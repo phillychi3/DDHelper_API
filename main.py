@@ -25,18 +25,47 @@ def getimage():
     
     conn = sqlite3.connect('images_data.db')
     c = conn.cursor()
-    c.execute('SELECT * FROM images')
+    if tags == None:
+
+        c.execute('SELECT * FROM images')
+    else:
+        if nsfw == "True":
+            c.execute('SELECT * FROM images WHERE tags LIKE "%' + tags + '%" AND nsfw = 1')
+        else:
+            c.execute('SELECT * FROM images WHERE tags LIKE "%' + tags + '%"')
+
     data = c.fetchall()
     conn.close()
+    return jsonify(data)
+    
     
 
 
 
 @app.route('/addimage', methods=['GET'])
 def addimage():
-    image = request.args.get('image')
+
+    if 'image' in request.args:
+         image = request.args.get('image')      
+    else:
+        return "no find data image"
+
+    if 'tags' in request.args:
+         tags = request.args.get('tags')      
+    else:
+        return "no find data tags"
+
+    if 'nsfw' in request.args:
+         nsfw = request.args.get('nsfw')      
+    else:
+        nsfw = None
+
     conn = sqlite3.connect('images_data.db')
     c = conn.cursor()
+    c.execute('INSERT INTO images (name, tags, nsfw) VALUES ( ?, ?, ?)', ((str(uuid.uuid4()))[36:-13:-1], tags, nsfw))
+    conn.commit()
+    conn.close()
+    return "add image successfully"
 
 
 
