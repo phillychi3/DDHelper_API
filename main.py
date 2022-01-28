@@ -53,14 +53,17 @@ def image(isnsfw):
     conn = sqlite3.connect('images_data.db')
     c = conn.cursor()
     if tags == None:
-
-        c.execute('SELECT * FROM images')
+        if isnsfw == "nsfw":
+            c.execute('SELECT * FROM images WHERE nsfw = "True"')
+        else:
+            c.execute('SELECT * FROM images WHERE nsfw = "False"')
+            
+        
     else:
         if isnsfw == "nsfw":
-            c.execute('SELECT * FROM images WHERE tags LIKE "%' +
-                      tags + '%" AND nsfw = True')
+            c.execute(f'SELECT * FROM images WHERE tags LIKE "%{tags}%" AND nsfw = "True"')
         else:
-            c.execute('SELECT * FROM images WHERE tags LIKE "%' + tags + '%"')
+            c.execute(f'SELECT * FROM images WHERE tags LIKE "%{tags}%" AND nsfw = "False"')
 
     data = c.fetchall()
     conn.close()
@@ -68,6 +71,7 @@ def image(isnsfw):
         return jsonify({"error": "no images in gat"})
     rand = random.randint(0, len(data)-1)
     print(data[rand][4])
+    print(data)
     id = data[rand][1] + '.' + data[rand][4]
 
     if isnsfw == "nsfw":
@@ -136,6 +140,9 @@ def addimage():
             img.save(imagepath +"nsfw/" +imgname + "."+ext)
         else:
             img.save(imagepath +"sfw/" +imgname + "."+ext)
+        
+        if nsfw != "True":
+            nsfw = "False"
             
         conn = sqlite3.connect('images_data.db')
         c = conn.cursor()
@@ -148,4 +155,5 @@ def addimage():
         return jsonify({"error": 87, "msg": "檔案格式不符"})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5500)
+    app.run(host='0.0.0.0', port=5500,ssl_context=('certificate.crt', 'private.key'))
+    #app.run(host='0.0.0.0', port=5500)
