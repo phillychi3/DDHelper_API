@@ -125,6 +125,8 @@ def showimage(isnsfw, id):
             image_data = open(f"images/nsfw/{id}", "rb").read()
             response = make_response(image_data)
             response.headers['Content-Type'] = f'image/{head}'
+            response.headers['cross-origin-resource-policy'] = 'cross-origin'
+            response.headers['access-control-allow-origin'] = '*'
             return response
         except:
             return jsonify({"error": "image not found"})
@@ -142,6 +144,8 @@ def showimage(isnsfw, id):
             image_data = open(f"images/sfw/{id}", "rb").read()
             response = make_response(image_data)
             response.headers['Content-Type'] = f'image/{head}'
+            response.headers['cross-origin-resource-policy'] = 'cross-origin'
+            response.headers['access-control-allow-origin'] = '*'
             return response
         except:
             return jsonify({"error": "image not found"})
