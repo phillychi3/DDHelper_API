@@ -76,17 +76,34 @@ def image(isnsfw):
 
     if isnsfw == "nsfw":
         try:
+            if data[rand][4] == "jpg":
+                head="jpeg"
+            elif data[rand][4] == "png":
+                head="png"
+            elif data[rand][4] == "gif":
+                head="gif"
+            else:
+                head="png"
+
             image_data = open(f"images/nsfw/{id}", "rb").read()
             response = make_response(image_data)
-            response.headers['Content-Type'] = 'image/png'
+            response.headers['Content-Type'] = f'image/{head}'
             return response
         except:
             return jsonify({"error": "image not found"})
     else:
         try:
+            if data[rand][4] == "jpg":
+                head="jpeg"
+            elif data[rand][4] == "png":
+                head="png"
+            elif data[rand][4] == "gif":
+                head="gif"
+            else:
+                head="png"
             image_data = open(f"images/sfw/{id}", "rb").read()
             response = make_response(image_data)
-            response.headers['Content-Type'] = 'image/png'
+            response.headers['Content-Type'] = f'image/{head}'
             return response
         except:
             return jsonify({"error": "image not found"})
@@ -96,17 +113,35 @@ def image(isnsfw):
 def showimage(isnsfw, id):
     if isnsfw == "nsfw":
         try:
+            ext = id.rsplit('.', 1)[1]
+            if ext == "jpg":
+                head="jpeg"
+            elif ext == "png":
+                head="png"
+            elif ext == "gif":
+                head="gif"
+            else:
+                head="png"  
             image_data = open(f"images/nsfw/{id}", "rb").read()
             response = make_response(image_data)
-            response.headers['Content-Type'] = 'image/png'
+            response.headers['Content-Type'] = f'image/{head}'
             return response
         except:
             return jsonify({"error": "image not found"})
     elif isnsfw == "sfw":
         try:
+            ext = id.rsplit('.', 1)[1]
+            if ext == "jpg":
+                head="jpeg"
+            elif ext == "png":
+                head="png"
+            elif ext == "gif":
+                head="gif"
+            else:
+                head="png"              
             image_data = open(f"images/sfw/{id}", "rb").read()
             response = make_response(image_data)
-            response.headers['Content-Type'] = 'image/png'
+            response.headers['Content-Type'] = f'image/{head}'
             return response
         except:
             return jsonify({"error": "image not found"})
