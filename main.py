@@ -3,6 +3,8 @@ import json
 import sqlite3
 import uuid
 import random
+import discord
+from discord_webhook import DiscordWebhook, DiscordEmbed
 
 app = Flask(__name__)
 app.config["DEBUG"] = True
@@ -29,18 +31,17 @@ def getimage(isnsfw):
     c = conn.cursor()
     if tags == None:
 
-        c.execute('SELECT * FROM images')
+        c.execute('SELECT * FROM images WHERE verify = "True"')
     else:
         if isnsfw == "nsfw":
             c.execute('SELECT * FROM images WHERE tags LIKE "%' +
-                      tags + '%" AND nsfw = True')
+                      tags + '%" AND "nsfw" = True AND verify = "True"')
         else:
-            c.execute('SELECT * FROM images WHERE tags LIKE "%' + tags + '%"')
+            c.execute('SELECT * FROM images WHERE tags LIKE "%' + tags + '%" AND nsfw = "False" AND verify = "True"')
 
     data = c.fetchall()
     conn.close()
     return jsonify(data)
-
 
 @app.route("/image/<isnsfw>", methods=["GET"])
 def image(isnsfw):
@@ -61,9 +62,9 @@ def image(isnsfw):
         
     else:
         if isnsfw == "nsfw":
-            c.execute(f'SELECT * FROM images WHERE tags LIKE "%{tags}%" AND nsfw = "True"')
+            c.execute(f'SELECT * FROM images WHERE tags LIKE "%{tags}%" AND nsfw = "True" AND verify = "True"')
         else:
-            c.execute(f'SELECT * FROM images WHERE tags LIKE "%{tags}%" AND nsfw = "False"')
+            c.execute(f'SELECT * FROM images WHERE tags LIKE "%{tags}%" AND nsfw = "False" AND verify = "True"')
 
     data = c.fetchall()
     conn.close()
@@ -188,6 +189,17 @@ def addimage():
         c.execute('INSERT INTO images (name, tags, nsfw,ext) VALUES ( ?, ?, ?, ?)',(imgname, str(tags), nsfw,ext))
         conn.commit()
         conn.close()
+
+        if nsfw == "True":
+            webhook = DiscordWebhook(url='https://discord.com/api/webhooks/947585191432568873/TW9YqZDT7QjQ4YcYoo20xlSPExvv_rNjN9iGDh53Rtqybh9R83cfUvGeQkcVTtfXC1Gy')
+            with open(f"images/nsfw/{imgname}.{ext}", "rb") as f:
+                webhook.add_file(file=f.read(), filename=f'nsfw.{ext}')
+            webhook.execute()
+        else:
+            webhook = DiscordWebhook(url='https://discord.com/api/webhooks/947585038789263400/7NLtwfUuD_GUp6EUK7hUiMYpVIA7TQGSv7pumZc883Jtrs6nBp389ZJeNOJYwkH-Z3UC')
+            with open(f"images/sfw/{imgname}.{ext}", "rb") as f:
+                webhook.add_file(file=f.read(), filename=f'sfw.{ext}')
+            webhook.execute()
 
         return jsonify({"success": 0, "msg": "上傳成功"})
     else:
