@@ -147,6 +147,7 @@ def showimage(isnsfw, id):
             response.headers['Content-Type'] = f'image/{head}'
             response.headers['cross-origin-resource-policy'] = 'cross-origin'
             response.headers['access-control-allow-origin'] = '*'
+
             return response
         except:
             return jsonify({"error": "image not found"})
@@ -206,5 +207,5 @@ def addimage():
         return jsonify({"error": 87, "msg": "檔案格式不符"})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5500,ssl_context=('certificate.crt', 'private.key'))
+    app.run(host='0.0.0.0', port=443,ssl_context=('certificate.crt', 'private.key'))
     #app.run(host='0.0.0.0', port=5500)
