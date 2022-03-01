@@ -7,7 +7,7 @@ import discord
 from discord_webhook import DiscordWebhook, DiscordEmbed
 
 app = Flask(__name__)
-app.config["DEBUG"] = True
+#app.config["DEBUG"] = True
 app.config["JSON_AS_ASCII"] = False
 
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'JPG', 'PNG', 'gif', 'GIF'])
