@@ -55,9 +55,9 @@ def image(isnsfw):
     c = conn.cursor()
     if tags == None:
         if isnsfw == "nsfw":
-            c.execute('SELECT * FROM images WHERE nsfw = "True"')
+            c.execute('SELECT * FROM images WHERE nsfw = "True" AND verify = "True"')
         else:
-            c.execute('SELECT * FROM images WHERE nsfw = "False"')
+            c.execute('SELECT * FROM images WHERE nsfw = "False" AND verify = "True"')
             
         
     else:
