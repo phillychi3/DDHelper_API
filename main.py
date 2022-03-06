@@ -5,6 +5,20 @@ import uuid
 import random
 import discord
 from discord_webhook import DiscordWebhook, DiscordEmbed
+import logging
+
+FORMAT = '[DDhelper image] %(asctime)s %(levelname)s: %(message)s'
+logger = logging.getLogger('DDhelperiapi')
+logger.setLevel(logging.INFO)
+
+handler = logging.FileHandler('ddhelperiapi.log')
+handler.setFormatter(logging.Formatter(FORMAT))
+logger.addHandler(handler)
+
+hdr = logging.StreamHandler()
+hdr.setFormatter(logging.Formatter(FORMAT))
+logger.addHandler(hdr)
+
 
 app = Flask(__name__)
 #app.config["DEBUG"] = True
