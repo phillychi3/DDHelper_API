@@ -13,10 +13,7 @@ bot.remove_command("help")
 def valid_user():
 
     def predicate(ctx):
-        with open('setting.json', 'r', encoding='utf8') as jfile:
-            jdata = json.load(jfile)
         istrue = ctx.message.author.id in [762484891945664542]
-
         if istrue:
             return istrue
         else:
@@ -38,6 +35,7 @@ async def uncheck(ctx):
     data = json.dumps(data)
     await ctx.send(data)
 
+@valid_user()
 @bot.command()
 async def verify(ctx,image):
     conn = sqlite3.connect('images_data.db')
