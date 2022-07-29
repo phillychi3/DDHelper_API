@@ -88,6 +88,16 @@ def live():
             except Exception as e:
                 print(e)
 
+    if 'platform' in request.args:
+        platform = request.args['platform']
+        for daname in data:
+            daname=str(daname)
+            try:
+                if data[daname]["platform"] == platform:
+                    results.append(data[daname])
+            except Exception as e:
+                print(e)
+
         return jsonify(results)
 
 @app.route('/allname', methods=['GET'])
