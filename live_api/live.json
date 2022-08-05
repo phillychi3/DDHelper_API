@@ -31,11 +31,11 @@
         "country": "JP",
         "clannel_url": "https://www.youtube.com/channel/UCp6993wxpyDPHUpavwDFqgg",
         "platform": "youtube",
-        "status": "LIVE_OFFLINE",
-        "picture": "https://i.ytimg.com/vi/s9XIyE4sBCo/maxresdefault_live.jpg",
-        "title": "【ファンクラブ特番】Special Session LIVE ～vol2.草野華余子～【チラ見せ】",
-        "link": "https://www.youtube.com/watch?v=s9XIyE4sBCo",
-        "timestamp": "1659091800",
+        "status": "NONE",
+        "picture": "NONE",
+        "title": "NONE",
+        "link": "https://www.youtube.com/channel/UCp6993wxpyDPHUpavwDFqgg/live",
+        "timestamp": "NONE",
         "laststreamtime": "NONE"
     },
     "roboco": {
@@ -45,10 +45,10 @@
         "clannel_url": "https://www.youtube.com/channel/UCDqI2jOz0weumE8s7paEk6g",
         "platform": "youtube",
         "status": "LIVE_OFFLINE",
-        "picture": "https://i.ytimg.com/vi/Xrb87KCPPzw/maxresdefault_live.jpg",
-        "title": "【stray】ボクは猫、ボクは猫、ボクは・・・にゃあ🐈＃２　【ホロライブ/ #ロボ子生放送】",
-        "link": "https://www.youtube.com/watch?v=Xrb87KCPPzw",
-        "timestamp": "1659070800",
+        "picture": "https://i.ytimg.com/vi/oXxS8AwgTUw/maxresdefault_live.jpg",
+        "title": "【FREECHAT】ろぼさーとボクのふりーーーーだむっ💖【#ロボ子さん】",
+        "link": "https://www.youtube.com/watch?v=oXxS8AwgTUw",
+        "timestamp": "1684846800",
         "laststreamtime": "NONE"
     },
     "aki": {
@@ -58,10 +58,10 @@
         "clannel_url": "https://www.youtube.com/channel/UCFTLzh12_nrtzqBPsTCqenA",
         "platform": "youtube",
         "status": "LIVE_OFFLINE",
-        "picture": "https://i.ytimg.com/vi/W5bDJmQqnSw/maxresdefault_live.jpg",
-        "title": "【ホロ麻雀大会】超豪運を掴み取れ！！#超越エキシビジョン -セガNET麻雀MJ-【アキロゼ視点ホロライブ】",
-        "link": "https://www.youtube.com/watch?v=W5bDJmQqnSw",
-        "timestamp": "1659088800",
+        "picture": "https://i.ytimg.com/vi/VoWHIX4tp5k/maxresdefault_live.jpg",
+        "title": "【free chat room】ロゼ隊のシェアハウス「蔦ハウス」Rosetai House",
+        "link": "https://www.youtube.com/watch?v=VoWHIX4tp5k",
+        "timestamp": "1671807600",
         "laststreamtime": "NONE"
     },
     "Yozora_Mel": {
@@ -96,12 +96,12 @@
         "country": "JP",
         "clannel_url": "https://www.youtube.com/channel/UCQ0UDLQCjY0rmuxCDE38FGg",
         "platform": "youtube",
-        "status": "LIVE_OFFLINE",
-        "picture": "https://i.ytimg.com/vi/INFI9FahPY0/maxresdefault_live.jpg",
-        "title": "🏮みんなの交流場🏮",
-        "link": "https://www.youtube.com/watch?v=INFI9FahPY0",
-        "timestamp": "1671894000",
-        "laststreamtime": "NONE"
+        "status": "OK",
+        "picture": "https://i.ytimg.com/vi/3Lbys2pktp0/maxresdefault_live.jpg",
+        "title": "【APEX】１カ月ぶりに戦場におりてみるぞッ！！【ホロライブ/夏色まつり】",
+        "link": "https://www.youtube.com/watch?v=3Lbys2pktp0",
+        "timestamp": "NONE",
+        "laststreamtime": 1659678239
     },
     "aqua": {
         "name": "aqua",
@@ -174,11 +174,11 @@
         "country": "JP",
         "clannel_url": "https://www.youtube.com/channel/UC0TXe_LYZ4scaW2XMyi5_kw",
         "platform": "youtube",
-        "status": "NONE",
-        "picture": "NONE",
-        "title": "NONE",
-        "link": "https://www.youtube.com/channel/UC0TXe_LYZ4scaW2XMyi5_kw/live",
-        "timestamp": "NONE",
+        "status": "LIVE_OFFLINE",
+        "picture": "https://i.ytimg.com/vi/M0U4rD5jfNM/maxresdefault_live.jpg",
+        "title": "【歌枠】夏曲縛り＆告知あり🌻SUMMER Singing Stream【ホロライブ / AZKi】",
+        "link": "https://www.youtube.com/watch?v=M0U4rD5jfNM",
+        "timestamp": "1659697200",
         "laststreamtime": "NONE"
     },
     "mio": {
@@ -187,11 +187,11 @@
         "country": "JP",
         "clannel_url": "https://www.youtube.com/channel/UCp-5t9SrOQwXMU7iIjQfARg",
         "platform": "youtube",
-        "status": "LIVE_OFFLINE",
-        "picture": "https://i.ytimg.com/vi/0OhmM3IDZVY/maxresdefault_live.jpg",
-        "title": "【大神ミオ視点】MJ超越エキシビジョン！東風は勝負に出たい！【ホロライブ × セガNET麻雀MJ】",
-        "link": "https://www.youtube.com/watch?v=0OhmM3IDZVY",
-        "timestamp": "1659088800",
+        "status": "NONE",
+        "picture": "NONE",
+        "title": "NONE",
+        "link": "https://www.youtube.com/channel/UCp-5t9SrOQwXMU7iIjQfARg/live",
+        "timestamp": "NONE",
         "laststreamtime": "NONE"
     },
     "miko": {
@@ -266,10 +266,10 @@
         "clannel_url": "https://www.youtube.com/channel/UC1DCedRgGHBdm81E1llLhOQ",
         "platform": "youtube",
         "status": "LIVE_OFFLINE",
-        "picture": "https://i.ytimg.com/vi/uTV7hqBdSdM/maxresdefault_live.jpg",
-        "title": "【ホロ麻雀大会】大会本番！豪運のスーパーコンピュータに隙はない！ぺこ！【ホロライブ/兎田ぺこら視点】",
-        "link": "https://www.youtube.com/watch?v=uTV7hqBdSdM",
-        "timestamp": "1659088800",
+        "picture": "https://i.ytimg.com/vi/4gisKCu30OI/maxresdefault_live.jpg",
+        "title": "【＃ぺこら200万人】みんなと目指せ２００万人！！！！！！！！ぺこ！【ホロライブ/兎田ぺこら】",
+        "link": "https://www.youtube.com/watch?v=4gisKCu30OI",
+        "timestamp": "1659700800",
         "laststreamtime": "NONE"
     },
     "marine": {
@@ -278,11 +278,11 @@
         "country": "JP",
         "clannel_url": "https://www.youtube.com/channel/UCCzUftO8KOVkV4wQG1vkUvg",
         "platform": "youtube",
-        "status": "LIVE_OFFLINE",
-        "picture": "https://i.ytimg.com/vi/IsKfSOipdoA/maxresdefault_live.jpg",
-        "title": "【誕生日カウントダウン！】【ホロライブ/宝鐘マリン】",
-        "link": "https://www.youtube.com/watch?v=IsKfSOipdoA",
-        "timestamp": "1659103200",
+        "status": "NONE",
+        "picture": "NONE",
+        "title": "NONE",
+        "link": "https://www.youtube.com/channel/UCCzUftO8KOVkV4wQG1vkUvg/live",
+        "timestamp": "NONE",
         "laststreamtime": "NONE"
     },
     "noel": {
@@ -304,11 +304,11 @@
         "country": "JP",
         "clannel_url": "https://www.youtube.com/channel/UCvInZx9h3jC2JzsIzoOebWg",
         "platform": "youtube",
-        "status": "LIVE_OFFLINE",
-        "picture": "https://i.ytimg.com/vi/XGm1k-OI6_0/maxresdefault_live.jpg",
-        "title": "【#超越エキシビジョン】大きく勝たせろください！🀄-セガNET麻雀MJ-【不知火フレア視点/ホロライブ】",
-        "link": "https://www.youtube.com/watch?v=XGm1k-OI6_0",
-        "timestamp": "1659088800",
+        "status": "NONE",
+        "picture": "NONE",
+        "title": "NONE",
+        "link": "https://www.youtube.com/channel/UCvInZx9h3jC2JzsIzoOebWg/live",
+        "timestamp": "NONE",
         "laststreamtime": "NONE"
     },
     "watame": {
@@ -317,11 +317,11 @@
         "country": "JP",
         "clannel_url": "https://www.youtube.com/channel/UCqm3BQLlJfvkTsX_hvm0UmA",
         "platform": "youtube",
-        "status": "NONE",
-        "picture": "NONE",
-        "title": "NONE",
-        "link": "https://www.youtube.com/channel/UCqm3BQLlJfvkTsX_hvm0UmA/live",
-        "timestamp": "NONE",
+        "status": "LIVE_OFFLINE",
+        "picture": "https://i.ytimg.com/vi/9Pd67GVQLF4/maxresdefault_live.jpg",
+        "title": "【Minecraft】BIGなサナちゃん！今日も積むぞー！！！【角巻わため/ホロライブ４期生】",
+        "link": "https://www.youtube.com/watch?v=9Pd67GVQLF4",
+        "timestamp": "1659704400",
         "laststreamtime": "NONE"
     },
     "towa": {
@@ -383,10 +383,10 @@
         "clannel_url": "https://www.youtube.com/channel/UCFKOVgVbGmX65RxO3EtH3iw",
         "platform": "youtube",
         "status": "LIVE_OFFLINE",
-        "picture": "https://i.ytimg.com/vi/jgY_hxPa_dg/maxresdefault_live.jpg",
-        "title": "【Free chat】配信復帰までのフリーチャット【ホロライブ/雪花ラミィ】",
-        "link": "https://www.youtube.com/watch?v=jgY_hxPa_dg",
-        "timestamp": "1659358800",
+        "picture": "https://i.ytimg.com/vi/Tn1XGHZUW-w/maxresdefault_live.jpg",
+        "title": "【Free chat】Lamy Room【ホロライブ/雪花ラミィ】",
+        "link": "https://www.youtube.com/watch?v=Tn1XGHZUW-w",
+        "timestamp": "1668438000",
         "laststreamtime": "NONE"
     },
     "nene": {
@@ -412,7 +412,7 @@
         "picture": "https://i.ytimg.com/vi/iX6VmSL1YOA/maxresdefault_live.jpg",
         "title": "【Free chat】ししろんの射撃訓練場【ホロライブ/獅白ぼたん】",
         "link": "https://www.youtube.com/watch?v=iX6VmSL1YOA",
-        "timestamp": "1659282049",
+        "timestamp": "1671896449",
         "laststreamtime": "NONE"
     },
     "polka": {
@@ -434,11 +434,11 @@
         "country": "EN",
         "clannel_url": "https://www.youtube.com/channel/UCHsx4Hqa-1ORjQTh9TYDhww",
         "platform": "youtube",
-        "status": "LIVE_OFFLINE",
-        "picture": "https://i.ytimg.com/vi/j1zBPms6R2k/maxresdefault_live.jpg",
-        "title": "【ALICE Fiction】Free Puzzle RPG from JP!! #ALICEFiction #kfp #キアライブ",
-        "link": "https://www.youtube.com/watch?v=j1zBPms6R2k",
-        "timestamp": "1659117600",
+        "status": "NONE",
+        "picture": "NONE",
+        "title": "NONE",
+        "link": "https://www.youtube.com/channel/UCHsx4Hqa-1ORjQTh9TYDhww/live",
+        "timestamp": "NONE",
         "laststreamtime": "NONE"
     },
     "calliope": {
@@ -448,10 +448,10 @@
         "clannel_url": "https://www.youtube.com/channel/UCL_qhgtOy0dy1Agp8vkySQg",
         "platform": "youtube",
         "status": "LIVE_OFFLINE",
-        "picture": "https://i.ytimg.com/vi/H-RVkfXWL4s/maxresdefault_live.jpg",
-        "title": "【CHAD CAST #07】Camping Trip with my CHAD BEST FRIENDS.",
-        "link": "https://www.youtube.com/watch?v=H-RVkfXWL4s",
-        "timestamp": "1659099600",
+        "picture": "https://i.ytimg.com/vi/XpyKJKI9TAU/maxresdefault_live.jpg",
+        "title": "⋆*✩THIS WEEK&#39;S SCHEDULE ⋆*✩",
+        "link": "https://www.youtube.com/watch?v=XpyKJKI9TAU",
+        "timestamp": "1686546900",
         "laststreamtime": "NONE"
     },
     "ina": {
@@ -462,7 +462,7 @@
         "platform": "youtube",
         "status": "LIVE_OFFLINE",
         "picture": "https://i.ytimg.com/vi/c7K6RInG3Dw/maxresdefault_live.jpg",
-        "title": "【WEEKLY SCHEDULE】7.11~7.17",
+        "title": "【WEEKLY SCHEDULE】 8.03~8.06",
         "link": "https://www.youtube.com/watch?v=c7K6RInG3Dw",
         "timestamp": "1664395200",
         "laststreamtime": "NONE"
@@ -525,12 +525,12 @@
         "country": "ID",
         "clannel_url": "https://www.youtube.com/channel/UChgTyjG-pdNvxxhdsXfHQ5Q",
         "platform": "youtube",
-        "status": "OK",
-        "picture": "https://i.ytimg.com/vi/BLGy178OdLI/maxresdefault_live.jpg",
-        "title": "【UNARCHIVED KARAOKE】Try to sing some English songs【Pavolia Reine/hololiveID 2nd gen】",
-        "link": "https://www.youtube.com/watch?v=BLGy178OdLI",
+        "status": "NONE",
+        "picture": "NONE",
+        "title": "NONE",
+        "link": "https://www.youtube.com/channel/UChgTyjG-pdNvxxhdsXfHQ5Q/live",
         "timestamp": "NONE",
-        "laststreamtime": 1659069411
+        "laststreamtime": "NONE"
     },
     "anya": {
         "name": "anya",
@@ -540,7 +540,7 @@
         "platform": "youtube",
         "status": "LIVE_OFFLINE",
         "picture": "https://i.ytimg.com/vi/JAUSrqX0hW8/maxresdefault_live.jpg",
-        "title": "【STREAM SCHEDULE/スケジュール】07.11~07.17",
+        "title": "【STREAM SCHEDULE/スケジュール】07.29~07.31",
         "link": "https://www.youtube.com/watch?v=JAUSrqX0hW8",
         "timestamp": "1672506000",
         "laststreamtime": "NONE"
@@ -564,11 +564,11 @@
         "country": "JP",
         "clannel_url": "https://www.youtube.com/channel/UCdYR5Oyz8Q4g0ZmB4PkTD7g",
         "platform": "youtube",
-        "status": "NONE",
-        "picture": "NONE",
-        "title": "NONE",
-        "link": "https://www.youtube.com/channel/UCdYR5Oyz8Q4g0ZmB4PkTD7g/live",
-        "timestamp": "NONE",
+        "status": "LIVE_OFFLINE",
+        "picture": "https://i.ytimg.com/vi/DY3pLJS8zSQ/maxresdefault_live.jpg",
+        "title": "【PR】「世界の終わりに柴犬と」 同時視聴 ❕初の声優のお話など...",
+        "link": "https://www.youtube.com/watch?v=DY3pLJS8zSQ",
+        "timestamp": "1660014000",
         "laststreamtime": "NONE"
     },
     "kotonoha_yukino": {
@@ -591,10 +591,10 @@
         "clannel_url": "https://www.youtube.com/channel/UCajhBT4nMrg3DLS-bLL2RCg",
         "platform": "youtube",
         "status": "LIVE_OFFLINE",
-        "picture": "https://i.ytimg.com/vi/NB11zj6Rrek/maxresdefault_live.jpg",
-        "title": "【フリチャ】SCHEDULE AND FREE CHAT【 天野ピカミィ / Pikamee 】",
-        "link": "https://www.youtube.com/watch?v=NB11zj6Rrek",
-        "timestamp": "1710846000",
+        "picture": "https://i.ytimg.com/vi/o6HwAEr1Ucc/maxresdefault_live.jpg",
+        "title": "#1 ぼくのなつやすみ2【#天野ピカミィ / #pikamee 】",
+        "link": "https://www.youtube.com/watch?v=o6HwAEr1Ucc",
+        "timestamp": "1659697200",
         "laststreamtime": "NONE"
     },
     "irys": {
@@ -681,12 +681,12 @@
         "country": "EN",
         "clannel_url": "https://www.youtube.com/channel/UCgmPnx-EEeOrZSg5Tiw7ZRQ",
         "platform": "youtube",
-        "status": "LIVE_OFFLINE",
-        "picture": "https://i.ytimg.com/vi/197OEpjj8RI/maxresdefault_live.jpg",
-        "title": "≪FREE CHAT≫ WAZZZZZZZUP",
-        "link": "https://www.youtube.com/watch?v=197OEpjj8RI",
-        "timestamp": "1717077600",
-        "laststreamtime": "NONE"
+        "status": "OK",
+        "picture": "https://i.ytimg.com/vi/ezpkkJ6Ysks/maxresdefault_live.jpg",
+        "title": "≪Shotgun King: The Final Checkmate≫ why play chess when you have pew",
+        "link": "https://www.youtube.com/watch?v=ezpkkJ6Ysks",
+        "timestamp": "NONE",
+        "laststreamtime": 1659678084
     },
     "Miyabi": {
         "name": "Miyabi",
@@ -720,11 +720,11 @@
         "country": "JP",
         "clannel_url": "https://www.youtube.com/channel/UCZgOv3YDEs-ZnZWDYVwJdmA",
         "platform": "youtube",
-        "status": "LIVE_OFFLINE",
-        "picture": "https://i.ytimg.com/vi/4zyZwbnAljE/maxresdefault_live.jpg",
-        "title": "Free chat 奏手イヅル",
-        "link": "https://www.youtube.com/watch?v=4zyZwbnAljE",
-        "timestamp": "1660273500",
+        "status": "NONE",
+        "picture": "NONE",
+        "title": "NONE",
+        "link": "https://www.youtube.com/channel/UCZgOv3YDEs-ZnZWDYVwJdmA/live",
+        "timestamp": "NONE",
         "laststreamtime": "NONE"
     },
     "Aruran": {
@@ -734,10 +734,10 @@
         "clannel_url": "https://www.youtube.com/channel/UCKeAhJvy8zgXWbh9duVjIaQ",
         "platform": "youtube",
         "status": "LIVE_OFFLINE",
-        "picture": "https://i.ytimg.com/vi/mNPHGoqx_iE/maxresdefault_live.jpg",
-        "title": "【同時視聴で振り返り】#ゆるボスタの旅 思い出語らい配信！【花咲みやび/岸堂天真/影山シエン/アルランディス/ホロスターズ】",
-        "link": "https://www.youtube.com/watch?v=mNPHGoqx_iE",
-        "timestamp": "1659348000",
+        "picture": "https://i.ytimg.com/vi/Bc1ezIKkFi0/maxresdefault_live.jpg",
+        "title": "【FreeChat 】来週の予定がわかる秘密基地【アルランディス】",
+        "link": "https://www.youtube.com/watch?v=Bc1ezIKkFi0",
+        "timestamp": "1668091200",
         "laststreamtime": "NONE"
     },
     "Rikka": {
@@ -772,11 +772,11 @@
         "country": "JP",
         "clannel_url": "https://www.youtube.com/channel/UCANDOlYTJT7N5jlRC3zfzVA",
         "platform": "youtube",
-        "status": "NONE",
-        "picture": "NONE",
-        "title": "NONE",
-        "link": "https://www.youtube.com/channel/UCANDOlYTJT7N5jlRC3zfzVA/live",
-        "timestamp": "NONE",
+        "status": "LIVE_OFFLINE",
+        "picture": "https://i.ytimg.com/vi/uT3Q2cSrVfI/maxresdefault_live.jpg",
+        "title": "【マリオカート8DX】新コースを走ってみようじゃあないか【夕刻ロベル/ホロスターズ】",
+        "link": "https://www.youtube.com/watch?v=uT3Q2cSrVfI",
+        "timestamp": "1659686400",
         "laststreamtime": "NONE"
     },
     "Shien": {
@@ -785,12 +785,12 @@
         "country": "JP",
         "clannel_url": "https://www.youtube.com/channel/UChSvpZYRPh0FvG4SJGSga3g",
         "platform": "youtube",
-        "status": "LIVE_OFFLINE",
-        "picture": "https://i.ytimg.com/vi/VfOmAbSU4R0/maxresdefault_live.jpg",
-        "title": "【フリーチャット(Freechat)】部下達のアジト、概要が書いてる場所【影山シエン/ホロスターズ】",
-        "link": "https://www.youtube.com/watch?v=VfOmAbSU4R0",
-        "timestamp": "1677250800",
-        "laststreamtime": "NONE"
+        "status": "OK",
+        "picture": "https://i.ytimg.com/vi/OuoKlGdML4c/maxresdefault_live.jpg",
+        "title": "【7 Days to End with You】言語の裏に隠された真実を探す物語 #2 ※ネタバレあり【影山シエン/ホロスターズ】",
+        "link": "https://www.youtube.com/watch?v=OuoKlGdML4c",
+        "timestamp": "NONE",
+        "laststreamtime": 1659678111
     },
     "Oga": {
         "name": "Oga",
@@ -864,10 +864,10 @@
         "clannel_url": "https://www.youtube.com/channel/UCs9_O1tRPMQTHQ-N_L6FU2g",
         "platform": "youtube",
         "status": "LIVE_OFFLINE",
-        "picture": "https://i.ytimg.com/vi/Gch6ZBA0tcw/maxresdefault_live.jpg",
-        "title": "【#超越エキシビジョン】豪運で優勝を掴み取る‼いざ出陣！ -セガNET麻雀MJ-【鷹嶺ルイ視点/ホロライブ】",
-        "link": "https://www.youtube.com/watch?v=Gch6ZBA0tcw",
-        "timestamp": "1659088800",
+        "picture": "https://i.ytimg.com/vi/9vaxfw1qFcY/maxresdefault_live.jpg",
+        "title": "【Free chat】幹部会の談話室【鷹嶺ルイ/ホロライブ】",
+        "link": "https://www.youtube.com/watch?v=9vaxfw1qFcY",
+        "timestamp": "1669734000",
         "laststreamtime": "NONE"
     },
     "Koyori": {
@@ -877,10 +877,10 @@
         "clannel_url": "https://www.youtube.com/channel/UC6eWCld0KwmyHFbAqK3V-Rw",
         "platform": "youtube",
         "status": "LIVE_OFFLINE",
-        "picture": "https://i.ytimg.com/vi/jBc3g6XKP1k/maxresdefault_live.jpg",
-        "title": "【ホロ麻雀大会】絶対優勝！！32000！！ #超越エキシビジョン -セガNET麻雀MJ-【博衣こより視点/ホロライブ】",
-        "link": "https://www.youtube.com/watch?v=jBc3g6XKP1k",
-        "timestamp": "1659088800",
+        "picture": "https://i.ytimg.com/vi/A81NFOBNvuM/maxresdefault_live.jpg",
+        "title": "🧪 Free Chat &amp; Schedule💗 Koyori Ch. 🧪",
+        "link": "https://www.youtube.com/watch?v=A81NFOBNvuM",
+        "timestamp": "1678806000",
         "laststreamtime": "NONE"
     },
     "Chloe": {
@@ -890,10 +890,10 @@
         "clannel_url": "https://www.youtube.com/channel/UCIBY1ollUsauvVi4hW4cumw",
         "platform": "youtube",
         "status": "LIVE_OFFLINE",
-        "picture": "https://i.ytimg.com/vi/9o_F84P1QpE/maxresdefault_live.jpg",
-        "title": "【#超越エキシビジョン】初心者ぽんこつ豪運プレイヤー沙花叉クロヱ、勝ちます！ #セガNET麻雀MJ【沙花叉クロヱ/ホロライブ】",
-        "link": "https://www.youtube.com/watch?v=9o_F84P1QpE",
-        "timestamp": "1659088800",
+        "picture": "https://i.ytimg.com/vi/BWf5Xy-LIJ0/maxresdefault_live.jpg",
+        "title": "【FreeChat】飼育員さんの生息地【沙花叉クロヱ】",
+        "link": "https://www.youtube.com/watch?v=BWf5Xy-LIJ0",
+        "timestamp": "1701454800",
         "laststreamtime": "NONE"
     },
     "Iroha": {
@@ -903,10 +903,10 @@
         "clannel_url": "https://www.youtube.com/channel/UC_vMYWcDjmfdpH6r4TTn1MQ",
         "platform": "youtube",
         "status": "LIVE_OFFLINE",
-        "picture": "https://i.ytimg.com/vi/00yir3xjwu4/maxresdefault_live.jpg",
-        "title": "【Free Chat】かざま隊宿舎🍃でござる！【風真いろは/ホロライブ】",
-        "link": "https://www.youtube.com/watch?v=00yir3xjwu4",
-        "timestamp": "1669734000",
+        "picture": "https://i.ytimg.com/vi/_F1R8d6ez-g/maxresdefault_live.jpg",
+        "title": "【歌枠】夏だ！金曜日だ！歌うでござる🎤【風真いろは/ホロライブ6期生】",
+        "link": "https://www.youtube.com/watch?v=_F1R8d6ez-g",
+        "timestamp": "1659697200",
         "laststreamtime": "NONE"
     },
     "nachoneko": {
@@ -928,10 +928,22 @@
         "country": "JP",
         "clannel_url": "https://www.twitch.tv/utonyan",
         "platform": "twitch",
-        "status": "LIVE",
-        "picture": "https://static-cdn.jtvnw.net/previews-ttv/live_user_utonyan-640x360.jpg",
-        "title": "Valorant! *✩ !member",
+        "status": "NONE",
+        "picture": "NONE",
+        "title": "NONE",
         "link": "https://www.twitch.tv/utonyan",
-        "laststreamtime": 1659069931
+        "laststreamtime": "NONE"
+    },
+    "rainteaorwhatever": {
+        "name": "rainteaorwhatever",
+        "company": "personal",
+        "country": "TW",
+        "clannel_url": "https://www.twitch.tv/rainteaorwhatever",
+        "platform": "twitch",
+        "status": "NONE",
+        "picture": "NONE",
+        "title": "NONE",
+        "link": "https://www.twitch.tv/rainteaorwhatever",
+        "laststreamtime": "NONE"
     }
 }

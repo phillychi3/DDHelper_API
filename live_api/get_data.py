@@ -5,7 +5,7 @@ import time
 import threading
 lv=islive()
 def start():
-    with open("tt.json","r")as f:
+    with open("setting.json","r")as f:
         data=json.load(f)
 
     for i in data:

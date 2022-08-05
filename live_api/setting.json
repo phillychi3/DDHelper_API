@@ -503,5 +503,12 @@
         "url": "https://www.twitch.tv/utonyan",
         "country": "JP",
         "platform": "twitch"
+    },
+    "rainteaorwhatever":{
+        "name": "rainteaorwhatever",
+        "company": "personal",
+        "url": "https://www.twitch.tv/rainteaorwhatever",
+        "country": "TW",
+        "platform": "twitch"
     }
 }
