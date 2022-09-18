@@ -4,7 +4,7 @@ import logging
 
 def getlist(url):
     nextpage = ""
-    f = open("list.txt", 'w')
+    allvideo = []
     while 1:
         apiurl = f"https://www.googleapis.com/youtube/v3/search?key=REMOVED&channelId={url}&part=snippet,id&order=date&maxResults=50&pageToken={nextpage}"
         r = requests.get(apiurl)
@@ -16,7 +16,7 @@ def getlist(url):
         for i in jason["items"]:
             try:
                 print(i['id']['videoId'])
-                f.write(f"https://www.youtube.com/watch?v={i['id']['videoId']}"+"\n")
+                allvideo.append(f"https://www.youtube.com/watch?v={i['id']['videoId']}")
             except:
                 print("ERROR")
-    f.close()
+    return allvideo
