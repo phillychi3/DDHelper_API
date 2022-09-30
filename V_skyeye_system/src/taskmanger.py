@@ -24,6 +24,10 @@ class taskmanger():
     # 主迴圈
     def main():
         ...
+        # 檢查是否有新任務
+        # 如果有: 執行新任務
+        # 如果沒有: 同步資料到mongodb
+        ...
     # 開始任務
     def run_task():
         ...
