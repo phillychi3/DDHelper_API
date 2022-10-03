@@ -13,9 +13,10 @@ class taskclass():
         self.maxprocess = self.videos
         self.videosinfo = {}
 
+
     def run(self):
         for i in self.videolist:
-            analyzed = analyze(i)
+            collaborator = analyze(i)
             # do something with self.vinfo
             # ...
 
