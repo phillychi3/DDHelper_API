@@ -6,17 +6,16 @@ class taskclass():
     def __init__(self,url):
         self.url = url
         self.videolist = getlist(url)
-        self.vinfo = ... # sub ...
         self.starttime = time.time()
         self.videos = len(self.videolist)
         self.process = 0
         self.maxprocess = self.videos
-        self.videosinfo = {}
+        self.videosinfo = []
 
 
     def run(self):
         for i in self.videolist:
-            collaborator = analyze(i)
+            self.videosinfo = analyze(i).getdata()
             # do something with self.vinfo
             # ...
 

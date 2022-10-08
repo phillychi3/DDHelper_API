@@ -10,7 +10,7 @@ class analyze():
 
 
 
-    def _getdata(self):
+    def getdata(self):
         req = requests.get(self.vid)
         return {
             "Gearing": self._analyze_Gearing(req),
