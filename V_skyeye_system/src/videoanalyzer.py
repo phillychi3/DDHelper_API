@@ -11,6 +11,14 @@ class analyze():
 
 
     def getdata(self):
+        """
+        return:
+        {
+            "gearing": [],
+            "viewcount": "",
+            "likecount": ""
+        }
+        """
         req = requests.get(self.vid)
         return {
             "Gearing": self._analyze_Gearing(req),

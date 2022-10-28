@@ -22,6 +22,14 @@ class taskclass():
 
 
 
+
+            
+            self.process += 1
+
+
+
+
+
     
 class taskmanger():
     def __init__(self) -> None:
