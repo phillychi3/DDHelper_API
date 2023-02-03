@@ -43,11 +43,12 @@ class analyze():
         return ldata
 
     # 觀看次數
+    #FIXME: 'ViewCount': '�[�ݦ��ơG220,104��'
     def _analyze_ViewCount(self,req):
         linkdata = re.findall(r'"viewCount":{"videoViewCountRenderer":{"viewCount":{"simpleText":"(.*?)"},"', req.text)
         return linkdata[0]
     # 點讚次數
-    #TODO
+    #FIXME: 'likecount': '13,445 �H���w'
     def _analyze_likecount(self,req):
         linkdata = re.findall(r'"defaultText":{"accessibility":{"accessibilityData":{"label":"(.*?)"}},', req.text)
         return linkdata[0]

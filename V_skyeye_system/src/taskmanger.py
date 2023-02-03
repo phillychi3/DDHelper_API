@@ -1,7 +1,7 @@
 from getvideolist import getlist
 from videoanalyzer import analyze
 import time
-
+import pprint
 class taskclass():
     def __init__(self,url):
         self.url = url
@@ -44,8 +44,9 @@ class taskmanger():
         self.where = 'starting_boot'
         # get list form mongodb and update all data
         test = "UCdn5BQ06XqgXoAxIhbqw5Rg"
-        vdlist = getlist(test)
-        analyzed = analyze(vdlist[0])
+        # vdlist = getlist(test)
+        # analyzed = analyze(vdlist[0])
+        analyzed = analyze("https://www.youtube.com/watch?v=K0WBLODVfy8").getdata()
         print(analyzed)
 
     
@@ -61,7 +62,7 @@ class taskmanger():
         ...
     # return 目前爬蟲位置
     def get_where(self):
-        ...
+        return self.where
     # return 目前爬蟲狀態
     def get_status(self):
         return self.status
