@@ -26,10 +26,13 @@ class analyze():
             "likecount": self._analyze_likecount(req)
         }
 
-# 連動者
+    # 連動者
+    #FIXME: 無法取得連動者
     def _analyze_Gearing(self,req):
         
         linkdata = re.findall(r'"description":{"runs":(.*?)},"subscribeButton"', req.text)
+        if linkdata == []:
+            return None
         jss=json.loads(linkdata[0])
         ldata = []
         for i in jss:
@@ -46,9 +49,9 @@ class analyze():
     #FIXME: 'ViewCount': '�[�ݦ��ơG220,104��'
     def _analyze_ViewCount(self,req):
         linkdata = re.findall(r'"viewCount":{"videoViewCountRenderer":{"viewCount":{"simpleText":"(.*?)"},"', req.text)
-        return linkdata[0]
+        return linkdata[0] if linkdata != [] else None
     # 點讚次數
     #FIXME: 'likecount': '13,445 �H���w'
     def _analyze_likecount(self,req):
         linkdata = re.findall(r'"defaultText":{"accessibility":{"accessibilityData":{"label":"(.*?)"}},', req.text)
-        return linkdata[0]
+        return linkdata[0] if linkdata != [] else None

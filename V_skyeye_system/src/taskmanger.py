@@ -2,6 +2,7 @@ from getvideolist import getlist
 from videoanalyzer import analyze
 import time
 import pprint
+from alive_progress import alive_bar
 class taskclass():
     def __init__(self,url):
         self.url = url
@@ -18,12 +19,7 @@ class taskclass():
             self.videosinfo = analyze(i).getdata()
             # do something with self.vinfo
             # ...
-
-
-
-
-
-            
+            print(self.videosinfo)
             self.process += 1
 
 
@@ -42,12 +38,17 @@ class taskmanger():
     def starting_boot(self):
         self.status = 'booting'
         self.where = 'starting_boot'
-        # get list form mongodb and update all data
-        test = "UCdn5BQ06XqgXoAxIhbqw5Rg"
-        # vdlist = getlist(test)
-        # analyzed = analyze(vdlist[0])
-        analyzed = analyze("https://www.youtube.com/watch?v=K0WBLODVfy8").getdata()
-        print(analyzed)
+        youtubers = ["UCLCl-QrtR3-gy01I_wxRtew"] #TODO: 從mongodb取得youtuber列表
+        for i in youtubers:
+            self.add_task(i)
+
+        with alive_bar(len(self.tasks)) as bar:
+            for i in self.tasks:
+                i.run()
+                bar()
+
+        # analyzed = analyze("https://www.youtube.com/watch?v=K0WBLODVfy8").getdata()
+        # print(analyzed)
 
     
     # 主迴圈
@@ -67,8 +68,8 @@ class taskmanger():
     def get_status(self):
         return self.status
     # 添加任務
-    def add_task(self):
-        ...
+    def add_task(self,url):
+        self.tasks.append(taskclass(url))
     # 同步資料到mongodb
     def syncdata(self):
         ...

@@ -9,14 +9,14 @@ def getlist(url):
         apiurl = f"https://www.googleapis.com/youtube/v3/search?key=REMOVED&channelId={url}&part=snippet,id&order=date&maxResults=50&pageToken={nextpage}"
         r = requests.get(apiurl)
         jason = r.json()
-        try:
-            nextpage = jason["nextPageToken"]
-        except:
-            break
         for i in jason["items"]:
-            try:
+            if i["id"]["kind"] != "youtube#video":
+                continue
+            else:
                 print(i['id']['videoId'])
                 allvideo.append(f"https://www.youtube.com/watch?v={i['id']['videoId']}")
-            except:
-                print("ERROR")
+        if "nextPageToken" in jason:
+            nextpage = jason["nextPageToken"]
+        else:
+            break
     return allvideo
