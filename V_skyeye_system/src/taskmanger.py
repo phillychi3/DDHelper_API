@@ -1,7 +1,6 @@
 from getvideolist import getlist
 from videoanalyzer import analyze
 import time
-import pprint
 from alive_progress import alive_bar
 class taskclass():
     def __init__(self,url):
