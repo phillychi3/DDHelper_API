@@ -1,45 +1,59 @@
 import api
-from control import ServiceManager
 import threading
-import atexit
 import signal
-import sys
 import logging
 import coloredlogs
+import yaml
+from database import _init
+import os
+nowpath = os.path.dirname(os.path.abspath(__file__))
+with open(nowpath+"\ddhelper_live.yaml" ,"r", encoding="utf-8") as f:
+    setting = yaml.load(f, Loader=yaml.FullLoader)
+_init(setting["database"])
+from control import Live_spider_control  # noqa: E402
 
 all_threading = []
-FORMAT = "[ETERNAL] %(asctime)s %(levelname)s: %(message)s"
-logger = logging.getLogger("eternal")
+FORMAT = "[ddhelper_live] %(asctime)s %(levelname)s: %(message)s"
+logger = logging.getLogger("ddhelper_live")
 coloredlogs.install(level="INFO")
 logger.setLevel(logging.DEBUG)
-handler = logging.FileHandler("eternal.log", encoding="utf-8")
+handler = logging.FileHandler("ddhelper_live.log", encoding="utf-8")
 handler.setFormatter(logging.Formatter(FORMAT))
 logger.addHandler(handler)
 
 
 def main():
+
     somm = threading.Thread(
         target=lambda: api.start().run(
             host="0.0.0.0", port=7600, debug=True, use_reloader=False
         )
-    ).start()
+    )
+    somm.deamon = True
+    somm.start()
     all_threading.append(somm)
-    sm = threading.Thread(target=ServiceManager).start()
+    sm = threading.Thread(target=Live_spider_control)
+    sm.deamon = True
+    sm.start()
     all_threading.append(sm)
     logger.info(all_threading)
+    try:
+        while all_threading:
+            for t in all_threading:
+                if not t.is_alive():
+                    all_threading.remove(t)
+
+    except:
+        pass
 
 
 if __name__ == "__main__":
-
-    def onexit():
-        for t in all_threading:
-            t.join()
-
-    atexit.register(onexit)
-
     def signal_handler(signal, frame):
         logger.info("You pressed Ctrl+C!")
-        sys.exit(0)
-
+        
+        print("exit")
+        os._exit(0)          
     signal.signal(signal.SIGINT, signal_handler)
     main()
+
+    

@@ -1,11 +1,11 @@
-from ytlv import islive
-import json
-import random
-import time
+from ytlv import youtube, twitch
 import asyncio
-lv=islive()
 
-
-def Live_spider(url):
+async def Live_spider(url):
     if "youtube.com" in url:
-        live = lv.ytlk(str(url))
+        live = youtube(str(url))
+    elif "twitch.tv" in url:
+        live = twitch(str(url))
+    live.update({"channel": url})
+    await asyncio.sleep(1)
+    return live
