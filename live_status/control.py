@@ -54,7 +54,7 @@ class Live_spider_control():
                 print(result)
                 log.error(f"fetch {result['channel']} error")
                 continue
-            db.update_channel(result['channel'],result)
+            db.update_live(result['channel'],result)
 
 
             
