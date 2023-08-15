@@ -11,6 +11,14 @@
             "program": "${workspaceFolder}/live_status/main.py",
             "console": "integratedTerminal",
             "justMyCode": true
+        },
+        {
+            "name": "skyeye",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/V_skyeye_system/taskmanger.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
         }
     ]
 }
