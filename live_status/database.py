@@ -44,15 +44,19 @@ class mongodata:
 
     def update_channel(self, channel, data):
         db = self.client["vtuber"]["channel"]
-        db.update_one({"channel": channel}, {"$set": data})
+        db.update_one({"name": channel}, {"$set": data})
 
+    def replace_channel(self, channel, data):
+        db = self.client["vtuber"]["channel"]
+        db.replace_one({"name": channel}, data)
+        
     def delete_channel(self, channel):
         db = self.client["vtuber"]["channel"]
-        db.delete_one({"channel": channel})
+        db.delete_one({"name": channel})
 
     def get_one_channel(self, channel):
         db = self.client["vtuber"]["channel"]
-        return db.find_one({"channel": channel})
+        return db.find_one({"name": channel})
 
     def reset_live(self):
         db = self.client["live"]["live"]

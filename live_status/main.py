@@ -15,7 +15,7 @@ from control import Live_spider_control  # noqa: E402
 all_threading = []
 FORMAT = "[ddhelper_live] %(asctime)s %(levelname)s: %(message)s"
 logger = logging.getLogger("ddhelper_live")
-coloredlogs.install(level="INFO")
+coloredlogs.install(level="DEBUG")
 logger.setLevel(logging.DEBUG)
 handler = logging.FileHandler("ddhelper_live.log", encoding="utf-8")
 handler.setFormatter(logging.Formatter(FORMAT))

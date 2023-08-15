@@ -510,5 +510,54 @@
         "url": "https://www.twitch.tv/rainteaorwhatever",
         "country": "TW",
         "platform": "twitch"
+    },
+    "FUWAMOCO ":{
+        "name": "FUWAMOCO ",
+        "company": "hololive",
+        "url": "https://www.youtube.com/@FUWAMOCOch",
+        "country": "EN",
+        "platform": "youtube"
+    },
+    "NerissaRavencroft":{
+        "name": "NerissaRavencroft",
+        "company": "hololive",
+        "url": "https://www.youtube.com/@NerissaRavencroft",
+        "country": "EN",
+        "platform": "youtube"
+    },
+    "KosekiBijou":{
+        "name": "KosekiBijou",
+        "company": "hololive",
+        "url": "https://www.youtube.com/@KosekiBijou",
+        "country": "EN",
+        "platform": "youtube"
+    },
+    "ShioriNovella":{
+        "name": "ShioriNovella",
+        "company": "hololive",
+        "url": "https://www.youtube.com/@ShioriNovella",
+        "country": "EN",
+        "platform": "youtube"
+    },
+    "VestiaZeta":{
+        "name": "VestiaZeta",
+        "company": "hololive",
+        "url": "https://www.youtube.com/@VestiaZeta",
+        "country": "ID",
+        "platform": "youtube"
+    },
+    "KaelaKovalskia":{
+        "name": "KaelaKovalskia",
+        "company": "hololive",
+        "url": "https://www.youtube.com/@KaelaKovalskia",
+        "country": "ID",
+        "platform": "youtube"
+    },
+    "KoboKanaeru":{
+        "name": "KoboKanaeru",
+        "company": "hololive",
+        "url": "https://www.youtube.com/@KoboKanaeru",
+        "country": "ID",
+        "platform": "youtube"
     }
 }
