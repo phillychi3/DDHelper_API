@@ -32,6 +32,13 @@ class mongodata:
         return [i["channel_url"] for i in db.find()]
 
     def insert_channel(self, channel_info):
+        """
+        "name": "",
+        "company": "",
+        "country": "",
+        "clannel_url": "",
+        "platform": "",
+        """
         db = self.client["vtuber"]["channel"]
         db.insert_one(channel_info)
 

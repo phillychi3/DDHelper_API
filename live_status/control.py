@@ -10,7 +10,6 @@ class Live_spider_control():
     def __init__(self) -> None:
         self.channel_list = db.get_channelurl_list()
         self.readylive = []
-        self.living = []
         time.sleep(3)
         self.main()
         while True:
@@ -21,8 +20,6 @@ class Live_spider_control():
         checklist = self.channel_list.copy()
         for channel in checklist:
             if channel in self.readylive:
-                checklist.remove(channel)
-            if channel in self.living:
                 checklist.remove(channel)
         if len(checklist) == 0:
             log.info("No channel to check")
@@ -43,11 +40,12 @@ class Live_spider_control():
         for task in tasks:
             result = task.result()
             if result["status"] == "OK":
-                self.living.append(result["channel"])
                 log.info(f"{result['channel']} is living")
             elif result["status"] == "LIVE_OFFLINE":
                 self.readylive.append(result["channel"])
                 log.info(f"{result['channel']} is reading to live")
+                # create a new time task to check live
+
             elif result["status"] == "NONE":
                 continue
             else:
@@ -56,9 +54,6 @@ class Live_spider_control():
                 continue
             db.update_live(result['channel'],result)
 
-
-            
-
-
-
+    async def wait_live(self,result):
+        ...
 
