@@ -17,19 +17,23 @@ class Live_spider_control:
 
     async def start_getdata(self):
         while True:
+            starttime = time.time()
             checklist = [channel for channel in self.channel_list if channel not in self.readylive]
-            log.info(f"work is start at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
+            log.info(f"work is start at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(starttime))}")
             if not checklist:
                 log.info("No channel to check")
             else:
                 log.info(f"Checking {len(checklist)} channels")
                 await self.run(checklist)
-            log.info(f"work is finish at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
+            endtime = time.time()
+            log.info(f"work is finish at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(endtime))}")
+            alltime = endtime - starttime
+            log.info(f"work is finish, use {int(alltime/60)}m {int(alltime%60)}s")
+            log.info(f"next work will be stard at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(endtime+600))}")
             await asyncio.sleep(600)
 
     async def run(self, checklist):
         tasks = [asyncio.create_task(Live_spider(channel)) for channel in checklist]
-        # results = await asyncio.gather(*tasks)
         results,_ = await asyncio.wait(tasks,return_when=asyncio.ALL_COMPLETED)
         for result in results:
             result = result.result()

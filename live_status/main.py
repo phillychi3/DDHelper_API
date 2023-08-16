@@ -1,4 +1,3 @@
-import api
 import threading
 import signal
 import logging
@@ -11,7 +10,7 @@ with open(nowpath+"\ddhelper_live.yaml" ,"r", encoding="utf-8") as f:
     setting = yaml.load(f, Loader=yaml.FullLoader)
 _init(setting["database"])
 from control import Live_spider_control  # noqa: E402
-
+import api # noqa: E402
 all_threading = []
 FORMAT = "[ddhelper_live] %(asctime)s %(levelname)s: %(message)s"
 logger = logging.getLogger("ddhelper_live")

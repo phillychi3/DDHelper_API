@@ -9,11 +9,11 @@ async def Live_spider(url):
         live = youtube(str(url))
         live = asdict(live)
         if (
-            live.timestamp != None
-            and int(live.timestamp) - time.time() > 60 * 60 * 24
-            and int(live.timestamp) - time.time() > 0
+            live["timestamp"] != None
+            and (int(live["timestamp"]) - time.time() > 60 * 60 * 24
+            or int(live["timestamp"]) - time.time() < 0)
         ):
-            live.status = None
+            live["status"] = None
     elif "twitch.tv" in url:
         live = twitch(str(url))
         live = asdict(live)

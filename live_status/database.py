@@ -31,6 +31,19 @@ class mongodata:
         db = self.client["vtuber"]["channel"]
         return [i["channel_url"] for i in db.find()]
 
+    def get_channels(self):
+        db = self.client["vtuber"]["channel"]
+        vtubers = []
+        for i in db.find():
+            vtubers.append({
+                "name": i["name"],
+                "company": i["company"],
+                "country": i["country"],
+                "channel_url": i["channel_url"],
+                "platform": i["platform"],
+            })
+        return vtubers
+        
     def insert_channel(self, channel_info):
         """
         "name": "",
@@ -65,6 +78,10 @@ class mongodata:
     def get_one_live(self, channel):
         db = self.client["live"]["live"]
         return db.find_one({"channel": channel})
+    
+    def getlivefromstatus(self, status):
+        db = self.client["live"]["live"]
+        return db.find({"status": status})
 
     def insert_live(self, live_info):
         db = self.client["live"]["live"]
