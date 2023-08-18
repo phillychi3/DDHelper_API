@@ -14,10 +14,11 @@ async def Live_spider(url):
             or int(live["timestamp"]) - time.time() < 0)
         ):
             live["status"] = None
+        live["platform"] = "youtube"
     elif "twitch.tv" in url:
         live = twitch(str(url))
         live = asdict(live)
-    
+        live["platform"] = "twitch"
     live.update({"channel": url})
     await asyncio.sleep(0.2)
     return live
