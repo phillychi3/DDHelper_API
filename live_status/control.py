@@ -7,8 +7,11 @@ log = logging.getLogger("ddhelper_live")
 
 
 class Live_spider_control:
-    def __init__(self) -> None:
-        self.channel_list = db.get_channelurl_list()
+    def __init__(self,debug=False) -> None:
+        if debug:
+            self.channel_list = db.get_channelurl_list()[:10]
+        else:
+            self.channel_list = db.get_channelurl_list()
         self.mainloop = asyncio.new_event_loop()
         self.readylive = set()
         time.sleep(3)
@@ -53,6 +56,7 @@ class Live_spider_control:
             db.update_live(result["channel"], result)
 
     async def wait_live(self, result):
+        # 這裡判斷有些問題，就算過了10分鐘，系統還是會在把他加入readylive
         print(int(result["timestamp"])-time.time())
         await asyncio.sleep(int(result["timestamp"])-time.time())
         res = await Live_spider(result["channel"])
@@ -61,14 +65,17 @@ class Live_spider_control:
             self.readylive.remove(result["channel"])
             db.update_live(result["channel"], res)
         else:
-            log.info(f"{res['channel']} is not living, wait more 10m")
-            await asyncio.sleep(600)
-            res = await Live_spider(result["channel"])
-            if res["status"] == "LIVE":
-                log.info(f"{res['channel']} is living")
-                self.readylive.remove(result["channel"])
-                db.update_live(result["channel"], res)
-            else:
-                log.info(f"{res['channel']} is not living, remove wait list")
-                self.readylive.remove(result["channel"])
-                db.update_live(result["channel"], res)
+            log.info(f"{res['channel']} is not living, retry in 10m")
+            for i in range(10):        
+                res = await Live_spider(result["channel"])
+                if res["status"] == "LIVE":
+                    log.info(f"{res['channel']} is living")
+                    self.readylive.remove(result["channel"])
+                    db.update_live(result["channel"], res)
+                    return
+                time.sleep(60)
+            log.info(f"{res['channel']} is not living, remove from readylist")
+            self.readylive.remove(result["channel"])
+            db.update_live(result["channel"], res)
+        return
+    

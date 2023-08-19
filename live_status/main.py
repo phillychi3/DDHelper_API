@@ -11,31 +11,39 @@ with open(nowpath+"\ddhelper_live.yaml" ,"r", encoding="utf-8") as f:
 _init(setting["database"])
 from control import Live_spider_control  # noqa: E402
 import api # noqa: E402
+
+DEBUG = False
+
+
 all_threading = []
 FORMAT = "[ddhelper_live] %(asctime)s %(levelname)s: %(message)s"
 logger = logging.getLogger("ddhelper_live")
-coloredlogs.install(level="DEBUG")
-logger.setLevel(logging.DEBUG)
+if DEBUG:
+    coloredlogs.install(level="DEBUG")
+    logger.setLevel(logging.DEBUG)
+else:
+    coloredlogs.install(level="INFO")
+    logger.setLevel(logging.INFO)
 handler = logging.FileHandler("ddhelper_live.log", encoding="utf-8")
 handler.setFormatter(logging.Formatter(FORMAT))
 logger.addHandler(handler)
+
 
 
 def main():
 
     somm = threading.Thread(
         target=lambda: api.start().run(
-            host="0.0.0.0", port=7600, debug=True, use_reloader=False
+            host="0.0.0.0", port=7600, debug=DEBUG, use_reloader=False
         )
     )
     somm.deamon = True
     somm.start()
     all_threading.append(somm)
-    sm = threading.Thread(target=Live_spider_control)
+    sm = threading.Thread(target=Live_spider_control,args=(DEBUG,))
     sm.deamon = True
     sm.start()
     all_threading.append(sm)
-    logger.info(all_threading)
     try:
         while all_threading:
             for t in all_threading:
