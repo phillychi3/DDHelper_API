@@ -92,4 +92,8 @@ class mongodata:
         if self.get_one_live(channel) == None:
             self.insert_live(data)
         else:
-            db.update_one({"channel": channel}, {"$set": data})
+            db.replace_one({"channel": channel}, data)
+    
+    def clean_nolive(self, nolivelist):
+        db = self.client["live"]["live"]
+        db.delete_many({"channel": {"$in": nolivelist}})
