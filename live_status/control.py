@@ -52,23 +52,27 @@ class Live_spider_control:
         results, _ = await asyncio.wait(tasks, return_when=asyncio.ALL_COMPLETED)
         nolivelist = []
         for result in results:
-            result = result.result()
-            if result["status"] == "LIVE":
-                log.info(f"{result['channel']} is living")
-            elif result["status"] == "READY_TO_LIVE":
-                self.readylive.add(result["channel"])
-                log.info(f"{result['channel']} is ready to live")
-                self.mainloop.create_task(self.wait_live(result))
+            try:
+                result = result.result()
+                if result["status"] == "LIVE":
+                    log.info(f"{result['channel']} is living")
+                elif result["status"] == "READY_TO_LIVE":
+                    self.readylive.add(result["channel"])
+                    log.info(f"{result['channel']} is ready to live")
+                    self.mainloop.create_task(self.wait_live(result))
 
-            elif result["status"] == None:
-                nolivelist.append(result["channel"])
-                continue
-            else:
-                print(result)
+                elif result["status"] == None:
+                    nolivelist.append(result["channel"])
+                    continue
+                else:
+                    print(result)
+                    log.error(f"fetch {result['channel']} error")
+                    continue
+                db.update_live(result["channel"], result)
+                db.clean_nolive(nolivelist)
+            except Exception as e:
                 log.error(f"fetch {result['channel']} error")
-                continue
-            db.update_live(result["channel"], result)
-            db.clean_nolive(nolivelist)
+                log.error(e)
 
     async def wait_live(self, result):
         # 這裡判斷有些問題，就算過了10分鐘，系統還是會在把他加入readylive
