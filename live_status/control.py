@@ -71,7 +71,7 @@ class Live_spider_control:
                 db.update_live(result["channel"], result)
                 db.clean_nolive(nolivelist)
             except Exception as e:
-                log.error(f"fetch {result['channel']} error")
+                log.error(f"fetch some error")
                 log.error(e)
 
     async def wait_live(self, result):
