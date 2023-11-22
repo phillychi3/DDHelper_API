@@ -6,7 +6,7 @@ import yaml
 from database import _init
 import os
 nowpath = os.path.dirname(os.path.abspath(__file__))
-with open(nowpath+"\ddhelper_live.yaml" ,"r", encoding="utf-8") as f:
+with open(os.path.join(nowpath,"ddhelper_live.yaml") ,"r", encoding="utf-8") as f:
     setting = yaml.load(f, Loader=yaml.FullLoader)
 _init(setting["database"])
 from control import Live_spider_control  # noqa: E402
@@ -57,10 +57,10 @@ def main():
 if __name__ == "__main__":
     def signal_handler(signal, frame):
         logger.info("You pressed Ctrl+C!")
-        
+
         print("exit")
-        os._exit(0)          
+        os._exit(0)
     signal.signal(signal.SIGINT, signal_handler)
     main()
 
-    
+

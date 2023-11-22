@@ -20,6 +20,9 @@ class Live_spider_control:
         self.mainloop.create_task(self.start_getdata())
         self.mainloop.run_forever()
 
+    def update_channel_list(self):
+        self.channel_list = db.get_channelurl_list()
+
     async def start_getdata(self):
         while True:
             starttime = time.time()
@@ -46,6 +49,7 @@ class Live_spider_control:
                 f"next work will be stard at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(endtime+600))}"
             )
             await asyncio.sleep(600)
+            self.update_channel_list()
 
     async def run(self, checklist):
         tasks = [asyncio.create_task(Live_spider(channel)) for channel in checklist]
