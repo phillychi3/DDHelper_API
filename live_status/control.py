@@ -18,6 +18,7 @@ class Live_spider_control:
         self.overtimelive = set()
         time.sleep(3)
         self.mainloop.create_task(self.start_getdata())
+        self.mainloop.create_task(self.check_readylist())
         self.mainloop.run_forever()
 
     def update_channel_list(self):
@@ -101,3 +102,17 @@ class Live_spider_control:
             self.readylive.remove(result["channel"])
             db.update_live(result["channel"], res)
         return
+
+    async def check_readylist(self):
+        while True:
+            print("檢測readylist中是否有卡住的直播中")
+            cplist = self.readylive.copy()
+            for live in cplist:
+                res = await Live_spider(live)
+                if res["status"] == None:
+                    self.readylive.remove(live)
+                    print(f"{live} is stock lol ,remove it")
+            await asyncio.sleep(1800)
+
+        
+
