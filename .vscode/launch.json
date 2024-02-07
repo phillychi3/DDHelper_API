@@ -6,7 +6,7 @@
     "configurations": [
         {
             "name": "livestatus",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/live_status/main.py",
             "console": "integratedTerminal",
@@ -14,7 +14,7 @@
         },
         {
             "name": "skyeye",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/V_skyeye_system/taskmanger.py",
             "console": "integratedTerminal",

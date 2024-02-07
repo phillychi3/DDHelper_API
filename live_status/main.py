@@ -37,11 +37,11 @@ def main():
             host="0.0.0.0", port=7600, debug=DEBUG, use_reloader=False
         )
     )
-    somm.deamon = True
+    somm.daemon = True
     somm.start()
     all_threading.append(somm)
     sm = threading.Thread(target=Live_spider_control,args=(DEBUG,))
-    sm.deamon = True
+    sm.daemon = True
     sm.start()
     all_threading.append(sm)
     try:

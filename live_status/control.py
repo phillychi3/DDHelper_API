@@ -3,6 +3,7 @@ import logging
 from spider import Live_spider
 from database import db
 import asyncio
+import traceback
 
 log = logging.getLogger("ddhelper_live")
 
@@ -75,9 +76,8 @@ class Live_spider_control:
                     continue
                 db.update_live(result["channel"], result)
                 db.clean_nolive(nolivelist)
-            except Exception as e:
-                log.error(f"fetch some error")
-                log.error(e)
+            except Exception:
+                traceback.print_exc()
 
     async def wait_live(self, result):
         # 這裡判斷有些問題，就算過了10分鐘，系統還是會在把他加入readylive
@@ -105,14 +105,11 @@ class Live_spider_control:
 
     async def check_readylist(self):
         while True:
-            print("檢測readylist中是否有卡住的直播中")
+            log.info("檢測readylist中是否有卡住的直播中")
             cplist = self.readylive.copy()
             for live in cplist:
                 res = await Live_spider(live)
                 if res["status"] == None:
                     self.readylive.remove(live)
-                    print(f"{live} is stock lol ,remove it")
+                    log.warn(f"{live} is stock lol ,remove it")
             await asyncio.sleep(1800)
-
-        
-

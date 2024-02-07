@@ -1,10 +1,13 @@
 import asyncio
 import time
+import logging
 from dataclasses import asdict
 from ytlv import twitch, youtube
 
+log = logging.getLogger("ddhelper_live")
 
 async def Live_spider(url):
+    log.debug(f"start check {url}")
     if "youtube.com" in url:
         live = youtube(str(url))
         live = asdict(live)
