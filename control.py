@@ -451,6 +451,7 @@ class VtuberTrackerControl:
                 "timestamp": None,
             }
 
+
     async def wait_live(self, result):
         """Wait for a scheduled stream to go live."""
         if not result["timestamp"]:
