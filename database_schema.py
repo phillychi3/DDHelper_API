@@ -1,6 +1,7 @@
-from pymongo import MongoClient, IndexModel, ASCENDING, TEXT
-from pymongo.server_api import ServerApi
 import logging
+
+from pymongo import ASCENDING, TEXT, IndexModel, MongoClient
+from pymongo.server_api import ServerApi
 
 logger = logging.getLogger("VtuberDatabase")
 

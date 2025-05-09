@@ -1,8 +1,8 @@
 import logging
-from typing import Any
-import requests
 import re
+from typing import Any
 
+import requests
 
 logger = logging.getLogger("VtuberCollector")
 

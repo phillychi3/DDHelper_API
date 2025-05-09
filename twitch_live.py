@@ -1,6 +1,7 @@
-import time
-from ytlv import twitch
 import logging
+import time
+
+from ytlv import twitch
 
 log = logging.getLogger("vtuber_tracker")
 

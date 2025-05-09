@@ -1,13 +1,13 @@
+import asyncio
+import logging
 import re
 import time
-import logging
-import asyncio
 import traceback
-
-from vtuber_collector import CollectionMethod
 
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+
+from vtuber_collector import CollectionMethod
 
 log = logging.getLogger("vtuber_tracker")
 

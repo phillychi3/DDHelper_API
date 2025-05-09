@@ -1,20 +1,17 @@
-from fastapi import FastAPI, Query, HTTPException, Depends
-from fastapi.middleware.cors import CORSMiddleware
-from typing import List, Dict, Any, Optional
-from enum import Enum
 import logging
-from database_schema import VtuberDatabase
-from vtuber_collector import VtuberCollector
-import uvicorn
+from enum import Enum
+from typing import Any
+
+from fastapi import Depends, FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-# Set up logging
+from database_schema import VtuberDatabase
+
 logger = logging.getLogger("vtuber_api")
 logger.setLevel(logging.INFO)
 handler = logging.FileHandler("vtuber_api.log", encoding="utf-8")
-handler.setFormatter(
-    logging.Formatter("[VtuberAPI] %(asctime)s %(levelname)s: %(message)s")
-)
+handler.setFormatter(logging.Formatter("[VtuberAPI] %(asctime)s %(levelname)s: %(message)s"))
 logger.addHandler(handler)
 
 app = FastAPI(
@@ -73,45 +70,33 @@ class VideoInfo(BaseModel):
     thumbnail: str = ""
     view_count: int = 0
     like_count: int = 0
-    collaborators: List[Dict[str, str]] = []
+    collaborators: list[dict[str, str]] = []
 
 
 class LiveInfo(BaseModel):
-    status: Optional[str] = None
+    status: str | None = None
     channel: str
-    video_id: Optional[str] = None
-    title: Optional[str] = None
-    thumbnail: Optional[str] = None
+    video_id: str | None = None
+    title: str | None = None
+    thumbnail: str | None = None
     platform: str
-    timestamp: Optional[float] = None
+    timestamp: float | None = None
 
 
-def init_api(database, vtuber_collector):
+def init_api(database):
     """Initialize the API with database and collector instances."""
-    global db, collector
+    global db
     db = database
-    collector = vtuber_collector
 
 
 def get_db():
     """Dependency for database access."""
     if db is None:
-        raise HTTPException(
-            status_code=500, detail="API not fully initialized - database missing"
-        )
+        raise HTTPException(status_code=500, detail="API not fully initialized - database missing")
     return db
 
 
-def get_collector():
-    """Dependency for collector access."""
-    if collector is None:
-        raise HTTPException(
-            status_code=500, detail="API not fully initialized - collector missing"
-        )
-    return collector
-
-
-@app.get("/live", response_model=List[LiveInfo], tags=["Live Streams"])
+@app.get("/live", response_model=list[LiveInfo], tags=["Live Streams"])
 async def get_live(
     status: LiveStatus = Query(LiveStatus.LIVE, description="Filter by live status"),
     platform: Platform = Query(Platform.ALL, description="Filter by platform"),
@@ -132,13 +117,13 @@ async def get_live(
     return livedata
 
 
-@app.get("/allvtuber", response_model=List[VTuber], tags=["VTubers"])
+@app.get("/allvtuber", response_model=list[VTuber], tags=["VTubers"])
 async def get_all_vtuber(db: VtuberDatabase = Depends(get_db)):
     """Get all VTuber information."""
     return db.get_channels()
 
 
-@app.get("/vtuber/{channel_id}", response_model=Dict[str, Any], tags=["VTubers"])
+@app.get("/vtuber/{channel_id}", response_model=dict[str, Any], tags=["VTubers"])
 async def get_vtuber(channel_id: str, db: VtuberDatabase = Depends(get_db)):
     """Get detailed information for a specific VTuber."""
     vtuber = db.get_channel(channel_id)
@@ -152,7 +137,7 @@ async def get_vtuber(channel_id: str, db: VtuberDatabase = Depends(get_db)):
     return vtuber
 
 
-@app.get("/videos/{channel_id}", response_model=List[VideoInfo], tags=["Videos"])
+@app.get("/videos/{channel_id}", response_model=list[VideoInfo], tags=["Videos"])
 async def get_channel_videos(
     channel_id: str,
     limit: int = Query(50, description="Results limit"),
@@ -184,7 +169,7 @@ async def get_video(video_id: str, db: VtuberDatabase = Depends(get_db)):
     return video
 
 
-@app.get("/search/vtubers", response_model=List[VTuber], tags=["Search"])
+@app.get("/search/vtubers", response_model=list[VTuber], tags=["Search"])
 async def search_vtubers(
     q: str = Query("", description="Search query"),
     limit: int = Query(50, description="Results limit"),
@@ -205,7 +190,7 @@ async def search_vtubers(
     return results
 
 
-@app.get("/search/videos", response_model=List[VideoInfo], tags=["Search"])
+@app.get("/search/videos", response_model=list[VideoInfo], tags=["Search"])
 async def search_videos(
     q: str = Query("", description="Search query"),
     limit: int = Query(50, description="Results limit"),
@@ -226,9 +211,7 @@ async def search_videos(
     return results
 
 
-@app.get(
-    "/collabs/{channel_id}", response_model=List[VideoInfo], tags=["Collaborations"]
-)
+@app.get("/collabs/{channel_id}", response_model=list[VideoInfo], tags=["Collaborations"])
 async def get_collabs(
     channel_id: str,
     limit: int = Query(50, description="Results limit"),
@@ -246,10 +229,10 @@ async def get_collabs(
     return videos
 
 
-@app.get("/filter/vtubers", response_model=List[VTuber], tags=["VTubers"])
+@app.get("/filter/vtubers", response_model=list[VTuber], tags=["VTubers"])
 async def filter_vtubers(
-    company: Optional[str] = Query(None, description="Filter by company"),
-    country: Optional[str] = Query(None, description="Filter by country"),
+    company: str | None = Query(None, description="Filter by company"),
+    country: str | None = Query(None, description="Filter by country"),
     platform: Platform = Query(Platform.YOUTUBE, description="Filter by platform"),
     limit: int = Query(50, description="Results limit"),
     skip: int = Query(0, description="Results offset"),
@@ -282,65 +265,8 @@ async def ping():
     return {"status": "ok", "message": "pong"}
 
 
-@app.get("/check-live/{channel_url_or_id}", response_model=LiveInfo, tags=["Testing"])
-async def check_live(
-    channel_url_or_id: str,
-    platform: Platform = Query(Platform.YOUTUBE, description="Platform to check"),
-    collector: VtuberCollector = Depends(get_collector),
-):
-    """Manually check if a channel is live (for testing)."""
-    try:
-        if platform == Platform.YOUTUBE:
-            result = collector.get_live_status(channel_url_or_id)
-        elif platform == Platform.TWITCH:
-            result = collector.get_twitch_status(channel_url_or_id)
-        else:
-            raise HTTPException(status_code=400, detail="Platform not supported")
+def start(host: str = "0.0.0.0", port: int = 7600, debug: bool = False):
+    """Start the FastAPI server."""
+    import uvicorn
 
-        return result
-    except Exception as e:
-        logger.error(f"Error checking live status: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.get(
-    "/update-channel/{channel_url_or_id}",
-    response_model=Dict[str, Any],
-    tags=["Testing"],
-)
-async def update_channel(
-    channel_url_or_id: str,
-    platform: Platform = Query(Platform.YOUTUBE, description="Platform to update"),
-    collector: VtuberCollector = Depends(get_collector),
-    db: VtuberDatabase = Depends(get_db),
-):
-    """Manually update channel data (for testing)."""
-    try:
-        if platform == Platform.YOUTUBE:
-            channel_data = collector.get_channel_info(channel_url_or_id)
-        elif platform == Platform.TWITCH:
-            channel_data = collector.get_channel_by_platform(
-                "twitch", channel_url_or_id
-            )
-        else:
-            raise HTTPException(status_code=400, detail="Platform not supported")
-
-        db.insert_channel(channel_data)
-
-        # Remove MongoDB ID
-        if "_id" in channel_data:
-            del channel_data["_id"]
-
-        return channel_data
-    except Exception as e:
-        logger.error(f"Error updating channel: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-def start(host="0.0.0.0", port=7600, debug=False):
-    """Start the FastAPI server using uvicorn."""
-    uvicorn.run(app, host=host, port=port, log_level="debug" if debug else "info")
-
-
-if __name__ == "__main__":
-    start()
+    uvicorn.run(app, host=host, port=port, log_level="info", reload=debug)

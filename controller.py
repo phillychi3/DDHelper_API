@@ -1,13 +1,13 @@
-import time
-import logging
 import asyncio
+import logging
+import time
 import traceback
 
-from database_schema import VtuberDatabase
-from youtube_live import Youtube_Live_api, Youtube_Live_webscrap
-from twitch_live import Twitch_Live_webscrap
-
 from googleapiclient.discovery import build
+
+from database_schema import VtuberDatabase
+from twitch_live import Twitch_Live_webscrap
+from youtube_live import Youtube_Live_api, Youtube_Live_webscrap
 
 log = logging.getLogger("vtuber_tracker")
 
@@ -43,7 +43,6 @@ class VtuberTrackerControl:
         time.sleep(3)
         self.mainloop.create_task(self.start_getdata())
         self.mainloop.create_task(self.check_readylist())
-        self.mainloop.create_task(self.update_channel_data())
         self.mainloop.run_forever()
 
     async def start_getdata(self):
@@ -87,6 +86,9 @@ class VtuberTrackerControl:
             for result in results:
                 try:
                     result_data = result.result()
+                    if result_data is None:
+                        log.warning(f"Result is None for {result}")
+                        continue
                     if result_data["status"] == "LIVE":
                         log.info(f"{result_data['channel']} is live")
                     elif result_data["status"] == "READY_TO_LIVE":
@@ -137,7 +139,7 @@ class VtuberTrackerControl:
         )
 
         if should_use_api:
-            return await Youtube_Live_api(self.youtube_api).check(channel_url)
+            return await Youtube_Live_api(self, self.youtube_api).check(channel_url)
         return await Youtube_Live_webscrap().check(channel_url)
 
     async def check_readylist(self):

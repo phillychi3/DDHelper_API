@@ -1,11 +1,13 @@
-import logging
-import requests
-import time
-import re
 import json
+import logging
+import re
+import time
 from enum import Enum
-from typing import List, Dict, Any, Optional
-from ytlv import youtube as ytlv_youtube, twitch as ytlv_twitch
+from typing import Any, Dict, List, Optional
+
+import requests
+from ytlv import twitch as ytlv_twitch
+from ytlv import youtube as ytlv_youtube
 
 logger = logging.getLogger("VtuberCollector")
 
