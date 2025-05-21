@@ -172,7 +172,7 @@ class Youtube_Live_webscrap(YoutubeLiveInterface):
             Dictionary with channel information
         """
         try:
-            url = f"https://www.youtube.com/{channel_id}"
+            url = f"https://www.youtube.com/channel/{channel_id}"
             response = requests.get(url)
 
             # Extract subscriber count
@@ -188,12 +188,14 @@ class Youtube_Live_webscrap(YoutubeLiveInterface):
             view_count = parse_count(view_text)
 
             # Extract channel name
-            title_pattern = r'<meta name="title" content="(.*?)">'
+            title_pattern = r"<title>(.*?) - YouTube</title>"
             title_match = re.search(title_pattern, response.text)
             channel_name = title_match.group(1) if title_match else "Unknown Channel"
 
             # Extract description
-            description_pattern = r'"description":\{"simpleText":"(.*?)"\}'
+            description_pattern = (
+                r'{"descriptionPreviewViewModel":{"description":{"content":"(.*?)"}'
+            )
             description_match = re.search(description_pattern, response.text)
             description = description_match.group(1) if description_match else ""
 
@@ -223,7 +225,7 @@ class Youtube_Live_webscrap(YoutubeLiveInterface):
                 "activity_status": "active",
                 "debut_date": "",  # Can't reliably get this from scraping
                 "platform": "youtube",
-                "channel_url": f"https://www.youtube.com/{channel_id}",
+                "channel_url": f"https://www.youtube.com/channel/{channel_id}",
                 "handle": handle,
                 "last_updated": time.time(),
             }
@@ -240,8 +242,9 @@ class Youtube_Live_webscrap(YoutubeLiveInterface):
 
 if __name__ == "__main__":
     channel_url = "https://www.youtube.com/@stringflowers"
+    # channel_url = "https://www.youtube.com/channel/UC--zuEfONeFXPvLqX0Kvbuw"
 
     youtube_live = Youtube_Live_webscrap()
-    chid = extract_channel_mouse_id(channel_url)
+    chid = extract_channel_id(channel_url)
     test = youtube_live.get_channel_info(chid)
     print(test)

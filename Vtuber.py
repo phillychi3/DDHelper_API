@@ -40,9 +40,8 @@ def extract_channel_id(channel_url_or_id: str) -> str:
             response = requests.get(handle_url)
 
             channel_id_patterns = [
-                r'"channelId":"(UC[A-Za-z0-9_-]{22})"',
-                r'"externalChannelId":"(UC[A-Za-z0-9_-]{22})"',
-                r"channelId\\x22:\\x22(UC[A-Za-z0-9_-]{22})\\x22",
+                r'"browseId":"(UC[A-Za-z0-9_-]{22})"',
+                r'<link rel="canonical" href="https://www.youtube.com/channel/(UC[A-Za-z0-9_-]{22})">',
             ]
 
             for pattern in channel_id_patterns:
