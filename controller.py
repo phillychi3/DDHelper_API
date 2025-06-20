@@ -7,7 +7,7 @@ from googleapiclient.discovery import build
 
 from database_schema import VtuberDatabase
 from twitch_live import Twitch_Live_webscrap
-from youtube_live import Youtube_Live_api, Youtube_Live_webscrap
+from youtube_live import Youtube_api, Youtube_webscrap
 
 log = logging.getLogger("vtuber_tracker")
 
@@ -139,8 +139,8 @@ class VtuberTrackerControl:
         )
 
         if should_use_api:
-            return await Youtube_Live_api(self, self.youtube_api).check(channel_url)
-        return await Youtube_Live_webscrap().check(channel_url)
+            return await Youtube_api(self, self.youtube_api).check(channel_url)
+        return await Youtube_webscrap().check(channel_url)
 
     async def check_readylist(self):
         """Periodically check the ready list for stale entries."""

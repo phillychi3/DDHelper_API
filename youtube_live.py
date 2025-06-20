@@ -6,7 +6,7 @@ from typing import Any
 from googleapiclient.errors import HttpError
 import requests
 
-from vtuber import extract_channel_id, extract_channel_mouse_id
+from vtuber import extract_channel_id
 from ytlv import youtube as ytlv_youtube
 from vtuber import parse_count
 
@@ -14,11 +14,11 @@ log = logging.getLogger("vtuber_tracker")
 
 
 class YoutubeLiveInterface:
-    async def check(self, channel_id_or_url: str, channel_url: str):
+    async def check(self, channel_url: str):
         pass
 
 
-class Youtube_Live_api(YoutubeLiveInterface):
+class Youtube_api(YoutubeLiveInterface):
     def __init__(self, controller: Any, api: Any = None):
         self.youtube_api = None
         self.controller = controller
@@ -106,7 +106,7 @@ class Youtube_Live_api(YoutubeLiveInterface):
             log.error(f"Error using YouTube API to check live status for {channel_id}: {e}")
 
 
-class Youtube_Live_webscrap(YoutubeLiveInterface):
+class Youtube_webscrap(YoutubeLiveInterface):
     async def check(self, channel_url):
         """Fallback to scraping method when API is unavailable or quota exceeded."""
         try:
@@ -209,6 +209,11 @@ class Youtube_Live_webscrap(YoutubeLiveInterface):
             handle_match = re.search(handle_pattern, response.text)
             handle = handle_match.group(1) if handle_match else ""
 
+            # Try to extract video count
+            video_count_pattern = r'},{"text":{"content":"(.*?) 部影片","styleRuns"'
+            video_count_match = re.search(video_count_pattern, response.text)
+            video_count = int(video_count_match.group(1)) if video_count_match else 0
+
             return {
                 "channel_id": channel_id,
                 "name": channel_name,
@@ -220,7 +225,7 @@ class Youtube_Live_webscrap(YoutubeLiveInterface):
                 "view_count": view_count,
                 "subscriber_count": subscriber_count,
                 "hidden_subscriber_count": subscriber_count == 0,
-                "video_count": 0,  # Can't reliably get this from scraping
+                "video_count": video_count,
                 "company": "Unknown",  # Need manual categorization
                 "activity_status": "active",
                 "debut_date": "",  # Can't reliably get this from scraping
@@ -244,7 +249,7 @@ if __name__ == "__main__":
     channel_url = "https://www.youtube.com/@stringflowers"
     # channel_url = "https://www.youtube.com/channel/UC--zuEfONeFXPvLqX0Kvbuw"
 
-    youtube_live = Youtube_Live_webscrap()
+    youtube_live = Youtube_webscrap()
     chid = extract_channel_id(channel_url)
     test = youtube_live.get_channel_info(chid)
     print(test)
