@@ -244,12 +244,148 @@ class Youtube_webscrap(YoutubeLiveInterface):
                 "last_updated": time.time(),
             }
 
+    def get_video_details(self, video_id: str) -> dict[str, Any]:
+        """
+        Get video details using web scraping as a fallback.
+
+        Args:
+            video_id: YouTube video ID
+
+        Returns:
+            Dictionary with video details
+        """
+        try:
+            url = f"https://www.youtube.com/watch?v={video_id}"
+            response = requests.get(url)
+
+            # Extract basic info
+            title_pattern = r'<meta name="title" content="(.*?)">'
+            title_match = re.search(title_pattern, response.text)
+            title = title_match.group(1) if title_match else "Unknown Video"
+
+            # Extract view count
+            view_pattern = r'"viewCount":{"simpleText":"(.*?)"}'
+            view_match = re.search(view_pattern, response.text)
+            view_text = view_match.group(1) if view_match else "0"
+            view_count = parse_count(view_text)
+
+            # Extract like count
+            like_pattern = r'"likeCount":"(.*?)"'
+            like_match = re.search(like_pattern, response.text)
+            like_count = int(like_match.group(1)) if like_match else 0
+
+            # Extract channel info
+            channel_pattern = r'"ownerChannelName":"(.*?)","uploadDate":"(.*?)"'
+            channel_match = re.search(channel_pattern, response.text)
+            channel_title = channel_match.group(1) if channel_match else "Unknown Channel"
+            published_at = channel_match.group(2) if channel_match else ""
+
+            # Extract description
+            description_pattern = r'"shortDescription":"(.*?)"'
+            description_match = re.search(description_pattern, response.text)
+            description = description_match.group(1) if description_match else ""
+
+            # Try to extract channel ID
+            channel_id_pattern = r'"channelId":"(.*?)"'
+            channel_id_match = re.search(channel_id_pattern, response.text)
+            channel_id = channel_id_match.group(1) if channel_id_match else ""
+
+            details = {
+                "video_id": video_id,
+                "title": title,
+                "description": description,
+                "published_at": published_at,
+                "channel_id": channel_id,
+                "channel_title": channel_title,
+                "tags": [],
+                "category_id": "",
+                "thumbnail": f"https://i.ytimg.com/vi/{video_id}/hqdefault.jpg",
+                "duration": "",
+                "view_count": view_count,
+                "like_count": like_count,
+                "comment_count": 0,
+            }
+
+            # Detect collaborations
+            details["collaborators"] = self.detect_collaborators(description)
+
+            return details
+        except Exception as e:
+            log.error(f"Error scraping video details for {video_id}: {e}")
+            return {
+                "video_id": video_id,
+                "title": "Unknown Video",
+                "description": "",
+                "collaborators": [],
+            }
+
+    def detect_collaborators(self, description: str) -> list[dict[str, str]]:
+        """
+        Detect collaborators mentioned in the video description.
+
+        Args:
+            description: Video description
+
+        Returns:
+            List of collaborator dictionaries
+        """
+        collaborators = []
+
+        youtube_patterns = [
+            r"(?:https?://)?(?:www\.)?youtube\.com/(?:channel/|c/|@)([^\s/]+)",
+            r"(?:https?://)?(?:www\.)?youtube\.com/user/([^\s/]+)",
+        ]
+
+        for pattern in youtube_patterns:
+            matches = re.findall(pattern, description)
+            for match in matches:
+                if not any(c["channel_id"] == match for c in collaborators):
+                    collaborators.append({"channel_id": match, "platform": "youtube"})
+
+        mention_patterns = [
+            r"@([A-Za-z0-9_][A-Za-z0-9_.-]*[A-Za-z0-9_])",
+            r"＠([A-Za-z0-9_][A-Za-z0-9_.-]*[A-Za-z0-9_])",
+        ]
+
+        for pattern in mention_patterns:
+            matches = re.findall(pattern, description)
+            for match in matches:
+                if match and not any(c["channel_id"] == match for c in collaborators):
+                    collaborators.append(
+                        {
+                            "channel_id": match,
+                            "platform": "youtube_handle",
+                        }
+                    )
+
+        collab_patterns = [
+            r"(?:collab|collaboration|コラボ|合作).*?(?:with|w/|と)\s*@([A-Za-z0-9_][A-Za-z0-9_.-]*[A-Za-z0-9_])",
+            r"(?:ft\.|featuring|出演者).*?@([A-Za-z0-9_][A-Za-z0-9_.-]*[A-Za-z0-9_])",
+            r"(?:guest|ゲスト|來賓).*?@([A-Za-z0-9_][A-Za-z0-9_.-]*[A-Za-z0-9_])",
+        ]
+
+        for pattern in collab_patterns:
+            matches = re.findall(pattern, description, re.IGNORECASE | re.DOTALL)
+            for match in matches:
+                if match and not any(c["channel_id"] == match for c in collaborators):
+                    collaborators.append(
+                        {
+                            "channel_id": match,
+                            "platform": "collaboration_mention",
+                        }
+                    )
+
+        return collaborators
+
 
 if __name__ == "__main__":
-    channel_url = "https://www.youtube.com/@stringflowers"
-    # channel_url = "https://www.youtube.com/channel/UC--zuEfONeFXPvLqX0Kvbuw"
-
     youtube_live = Youtube_webscrap()
-    chid = extract_channel_id(channel_url)
-    test = youtube_live.get_channel_info(chid)
-    print(test)
+    # channel_url = "https://www.youtube.com/@stringflowers"
+
+    # chid = extract_channel_id(channel_url)
+    # test = youtube_live.get_channel_info(chid)
+    # print(test)
+
+    video_id = "MUt3DIyXieU"
+    video_details = youtube_live.get_video_details(video_id)
+    print(video_details)
