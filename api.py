@@ -83,10 +83,38 @@ class LiveInfo(BaseModel):
     timestamp: float | None = None
 
 
-def init_api(database):
-    """Initialize the API with database and collector instances."""
-    global db
+class ControllerStatus(BaseModel):
+    current_task: str
+    current_channel: str | None = None
+    total_channels: int
+    checked_channels: int
+    last_check_start: float | None = None
+    last_check_end: float | None = None
+    next_check_time: float | None = None
+    api_quota_used: int
+    api_quota_limit: int
+    api_quota_exceeded: bool
+    api_quota_reset_time: float
+    ready_live_count: int
+    is_running: bool
+    errors: list[dict] = []
+
+
+controller = None
+
+
+def init_api(database, tracker_controller=None):
+    """Initialize the API with database and controller instances."""
+    global db, controller
     db = database
+    controller = tracker_controller
+
+
+def get_controller():
+    """Dependency for controller access."""
+    if controller is None:
+        raise HTTPException(status_code=500, detail="Controller not available")
+    return controller
 
 
 def get_db():
@@ -94,6 +122,16 @@ def get_db():
     if db is None:
         raise HTTPException(status_code=500, detail="API not fully initialized - database missing")
     return db
+
+
+@app.get("/status", response_model=ControllerStatus, tags=["System"])
+async def get_controller_status(controller=Depends(get_controller)):
+    """Get current controller status and progress."""
+    try:
+        status = controller.get_status()
+        return status
+    except Exception:
+        raise HTTPException(status_code=500, detail="Failed to get controller status")
 
 
 @app.get("/live", response_model=list[LiveInfo], tags=["Live Streams"])

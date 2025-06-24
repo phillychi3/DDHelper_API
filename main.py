@@ -41,7 +41,7 @@ logger.addHandler(handler)
 all_threading = []
 
 
-def init_api_thread():
+def init_api_thread(tracker_control=None):
     api_thread = threading.Thread(
         target=lambda: api.start(
             host=setting.get("api_host", "0.0.0.0"),
@@ -64,13 +64,15 @@ def init_tracker_thread():
         tracker_control.api_quota_exceeded = True
         logger.info("API usage disabled by configuration")
 
+    api.init_api(db, tracker_control)
+
     tracker_thread = threading.Thread(
         target=lambda: tracker_control, args=(), name="Tracker_Thread"
     )
     tracker_thread.daemon = True
     tracker_thread.start()
     all_threading.append(tracker_thread)
-    return tracker_thread
+    return tracker_thread, tracker_control
 
 
 def main():

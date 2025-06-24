@@ -40,15 +40,43 @@ class VtuberTrackerControl:
         self.api_quota_reset_time = time.time() + 86400
         self.max_api_units_per_day = 10000
 
+        self.status = {
+            "current_task": "initializing",
+            "current_channel": None,
+            "total_channels": len(self.channel_list),
+            "checked_channels": 0,
+            "last_check_start": None,
+            "last_check_end": None,
+            "next_check_time": None,
+            "api_quota_used": 0,
+            "api_quota_limit": self.max_api_units_per_day,
+            "api_quota_reset_time": self.api_quota_reset_time,
+            "ready_live_count": 0,
+            "is_running": True,
+            "errors": [],
+        }
+
         time.sleep(3)
         self.mainloop.create_task(self.start_getdata())
         self.mainloop.create_task(self.check_readylist())
         self.mainloop.run_forever()
 
+    def get_status(self):
+        """獲取當前 controller 狀態"""
+        self.status["api_quota_used"] = self.api_units_used_today
+        self.status["ready_live_count"] = len(self.readylive)
+        self.status["api_quota_exceeded"] = self.api_quota_exceeded
+        return self.status.copy()
+
     async def start_getdata(self):
         """Main loop for checking live status."""
         while True:
             starttime = time.time()
+            self.status["current_task"] = "checking_live_status"
+            self.status["last_check_start"] = starttime
+            self.status["checked_channels"] = 0
+            self.status["current_channel"] = None
+
             checklist = [channel for channel in self.channel_list if channel not in self.readylive]
 
             log.info(
@@ -62,6 +90,11 @@ class VtuberTrackerControl:
                 await self.run(checklist)
 
             endtime = time.time()
+            self.status["last_check_end"] = endtime
+            self.status["next_check_time"] = endtime + 600
+            self.status["current_task"] = "waiting"
+            self.status["current_channel"] = None
+
             log.info(
                 f"Live status check finished at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(endtime))}"
             )
@@ -77,9 +110,12 @@ class VtuberTrackerControl:
     async def run(self, checklist):
         """Check live status for a list of channels."""
         tasks = []
-        for channel_url in checklist:
+        for i, channel_url in enumerate(checklist):
+            self.status["current_channel"] = channel_url
+            self.status["checked_channels"] = i
             await asyncio.sleep(0.2)
             tasks.append(asyncio.create_task(self.check_live_status(channel_url)))
+
         if tasks:
             nolivelist = []
             results, _ = await asyncio.wait(tasks, return_when=asyncio.ALL_COMPLETED)
@@ -105,10 +141,21 @@ class VtuberTrackerControl:
                     self.db.update_live(result_data["channel"], result_data)
                 except Exception as e:
                     log.error(f"Error processing live status result: {e}")
-                    traceback.print_exc()
+                    error_info = {
+                        "timestamp": time.time(),
+                        "error": str(e),
+                        "traceback": traceback.format_exc(),
+                    }
+                    self.status["errors"].append(error_info)
+                    if len(self.status["errors"]) > 10:
+                        self.status["errors"].pop(0)
+                    # traceback.print_exc()
+
             if nolivelist:
                 log.info(f"Removing {len(nolivelist)} channels from live database")
                 self.db.clean_nolive(nolivelist)
+
+        self.status["checked_channels"] = len(checklist)
 
     async def check_live_status(self, channel_url):
         """Check live status for a single channel using YouTube API directly."""
