@@ -1,4 +1,5 @@
 import asyncio
+import datetime
 import logging
 import time
 import traceback
@@ -13,7 +14,7 @@ log = logging.getLogger("vtuber_tracker")
 
 
 class VtuberTrackerControl:
-    def __init__(self, db, api_key, debug=False) -> None:
+    def __init__(self, db: VtuberDatabase, api_key, debug=False) -> None:
         self.db: VtuberDatabase = db
         self.debug = debug
 
@@ -40,6 +41,8 @@ class VtuberTrackerControl:
         self.api_quota_reset_time = time.time() + 86400
         self.max_api_units_per_day = 10000
 
+        self.next_channel_update_time = self._get_next_midnight()
+
         self.status = {
             "current_task": "initializing",
             "current_channel": None,
@@ -54,19 +57,63 @@ class VtuberTrackerControl:
             "ready_live_count": 0,
             "is_running": True,
             "errors": [],
+            "next_channel_update_time": self.next_channel_update_time,
+            "last_channel_update": None,
         }
 
         time.sleep(3)
         self.mainloop.create_task(self.start_getdata())
         self.mainloop.create_task(self.check_readylist())
+        self.mainloop.create_task(self.schedule_channel_update())
         self.mainloop.run_forever()
+
+    def _get_next_midnight(self):
+        """計算下一次午夜 12:00 的時間戳"""
+        now = datetime.datetime.now()
+        if now.hour >= 0:
+            next_midnight = now.replace(
+                hour=0, minute=0, second=0, microsecond=0
+            ) + datetime.timedelta(days=1)
+        else:
+            next_midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
+
+        return next_midnight.timestamp()
 
     def get_status(self):
         """獲取當前 controller 狀態"""
         self.status["api_quota_used"] = self.api_units_used_today
         self.status["ready_live_count"] = len(self.readylive)
         self.status["api_quota_exceeded"] = self.api_quota_exceeded
+        self.status["next_channel_update_time"] = self.next_channel_update_time
         return self.status.copy()
+
+    async def schedule_channel_update(self):
+        """定時執行頻道資料更新的排程器"""
+        while True:
+            current_time = time.time()
+            if current_time >= self.next_channel_update_time:
+                log.info("開始執行每日頻道資料更新...")
+                self.status["current_task"] = "updating_channel_data"
+                try:
+                    await self.update_channel_data()
+                    self.status["last_channel_update"] = current_time
+                    log.info("每日頻道資料更新完成")
+                except Exception as e:
+                    log.error(f"頻道資料更新失敗: {e}")
+                    error_info = {
+                        "timestamp": time.time(),
+                        "error": f"Channel update failed: {str(e)}",
+                        "traceback": traceback.format_exc(),
+                    }
+                    self.status["errors"].append(error_info)
+                    if len(self.status["errors"]) > 10:
+                        self.status["errors"].pop(0)
+                self.next_channel_update_time = self._get_next_midnight()
+                self.status["next_channel_update_time"] = self.next_channel_update_time
+                log.info(
+                    f"下次頻道資料更新時間: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(self.next_channel_update_time))}"
+                )
+            await asyncio.sleep(3600)
 
     async def start_getdata(self):
         """Main loop for checking live status."""
@@ -105,7 +152,6 @@ class VtuberTrackerControl:
             )
 
             await asyncio.sleep(600)
-            self.update_channel_list()
 
     async def run(self, checklist):
         """Check live status for a list of channels."""
@@ -156,6 +202,43 @@ class VtuberTrackerControl:
                 self.db.clean_nolive(nolivelist)
 
         self.status["checked_channels"] = len(checklist)
+
+    async def update_channel_data(self):
+        """Update channel data from the database."""
+        log.info("Updating channel data from database")
+        try:
+            old_channel_count = len(self.channel_list)
+            self.channel_list = self.db.get_channelurl_list()
+            update_count = 0
+            for channel_url in self.channel_list:
+                try:
+                    channel_data = Youtube_webscrap().get_channel_info(channel_url)
+                    if channel_data:
+                        self.db.insert_channel(channel_data)
+                        update_count += 1
+                        log.debug(f"Updated channel data for {channel_data['channel_url']}")
+                except Exception as e:
+                    log.error(f"Error updating individual channel {channel_url}: {e}")
+                await asyncio.sleep(0.5)
+            log.info(
+                f"Updated {update_count} channels out of {len(self.channel_list)} total channels"
+            )
+            self.status["total_channels"] = len(self.channel_list)
+            if len(self.channel_list) != old_channel_count:
+                log.info(
+                    f"Channel count changed from {old_channel_count} to {len(self.channel_list)}"
+                )
+
+        except Exception as e:
+            log.error(f"Error updating channel data: {e}")
+            error_info = {
+                "timestamp": time.time(),
+                "error": str(e),
+                "traceback": traceback.format_exc(),
+            }
+            self.status["errors"].append(error_info)
+            if len(self.status["errors"]) > 10:
+                self.status["errors"].pop(0)
 
     async def check_live_status(self, channel_url):
         """Check live status for a single channel using YouTube API directly."""

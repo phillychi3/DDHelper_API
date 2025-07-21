@@ -60,13 +60,13 @@ class VtuberDatabase:
     def insert_channel(self, channel_data):
         """Insert or update a channel in the database."""
         try:
-            channel_id = channel_data.get("channel_id")
-            if not channel_id:
-                logger.error("Cannot insert channel without channel_id")
+            channel_url = channel_data.get("channel_url")
+            if not channel_url:
+                logger.error("Cannot insert channel without channel_url")
                 return False
 
             self.db.channel.update_one(
-                {"channel_id": channel_id}, {"$set": channel_data}, upsert=True
+                {"channel_url": channel_url}, {"$set": channel_data}, upsert=True
             )
             return True
         except Exception as e:
@@ -131,9 +131,7 @@ class VtuberDatabase:
                 logger.error("Cannot insert video without video_id")
                 return False
 
-            self.db.videos.update_one(
-                {"video_id": video_id}, {"$set": video_data}, upsert=True
-            )
+            self.db.videos.update_one({"video_id": video_id}, {"$set": video_data}, upsert=True)
             return True
         except Exception as e:
             logger.error(f"Error inserting video: {e}")
@@ -184,20 +182,124 @@ class VtuberDatabase:
 
     def search_channels(self, query, limit=50, skip=0):
         """Search for channels by text query."""
-        return list(
-            self.db.channel.find({"$text": {"$search": query}}).skip(skip).limit(limit)
-        )
+        return list(self.db.channel.find({"$text": {"$search": query}}).skip(skip).limit(limit))
 
     def search_videos(self, query, limit=50, skip=0):
         """Search for videos by text query."""
-        return list(
-            self.db.videos.find({"$text": {"$search": query}}).skip(skip).limit(limit)
-        )
+        return list(self.db.videos.find({"$text": {"$search": query}}).skip(skip).limit(limit))
 
     def get_collaborations(self, channel_id, limit=50, skip=0):
         """Get videos where the specified channel is a collaborator."""
         return list(
-            self.db.videos.find({"collaborators.channel_id": channel_id})
-            .skip(skip)
-            .limit(limit)
+            self.db.videos.find({"collaborators.channel_id": channel_id}).skip(skip).limit(limit)
         )
+
+    def upgrade_channel_data_format(self):
+        """
+        升級舊的頻道資料格式到新格式
+        將缺少的必要欄位添加到現有記錄中
+        """
+        try:
+            logger.info("開始升級頻道資料格式...")
+
+            # 獲取所有頻道記錄
+            all_channels = list(self.db.channel.find())
+            updated_count = 0
+
+            for channel in all_channels:
+                update_data = {}
+                needs_update = False
+
+                # 檢查並添加缺少的必要欄位
+                required_fields = {
+                    "name": "",
+                    "company": "",
+                    "country": "",
+                    "channel_url": "",
+                    "platform": "youtube",  # 預設為 youtube
+                    "subscriber_count": 0,
+                    "view_count": 0,
+                    "video_count": 0,
+                    "activity_status": "active",
+                    "debut_date": "",
+                    "thumbnail": "",
+                    "channel_id": "",
+                }
+
+                # 檢查每個必要欄位
+                for field, default_value in required_fields.items():
+                    if field not in channel or channel[field] is None:
+                        update_data[field] = default_value
+                        needs_update = True
+
+                # 特殊處理：如果有 channel_url 但沒有 platform，根據 URL 判斷平台
+                if "channel_url" in channel and channel["channel_url"]:
+                    if "platform" not in channel or not channel["platform"]:
+                        if "youtube.com" in channel["channel_url"]:
+                            update_data["platform"] = "youtube"
+                        elif "twitch.tv" in channel["channel_url"]:
+                            update_data["platform"] = "twitch"
+                        else:
+                            update_data["platform"] = "unknown"
+                        needs_update = True
+
+                # 如果需要更新，執行更新操作
+                if needs_update:
+                    self.db.channel.update_one({"_id": channel["_id"]}, {"$set": update_data})
+                    updated_count += 1
+                    logger.debug(
+                        f"已更新頻道: {channel.get('name', 'Unknown')} ({channel.get('channel_id', 'No ID')})"
+                    )
+
+            logger.info(f"頻道資料格式升級完成，共更新了 {updated_count} 個頻道記錄")
+            return updated_count
+
+        except Exception as e:
+            logger.error(f"升級頻道資料格式時發生錯誤: {e}")
+            return 0
+
+    def migrate_old_channel_format(self, old_format_mapping=None):
+        """
+        遷移舊格式的頻道資料
+
+        Args:
+            old_format_mapping: 舊欄位名稱到新欄位名稱的映射字典
+                              例如: {'old_name': 'name', 'old_company': 'company'}
+        """
+        try:
+            if not old_format_mapping:
+                # 預設的欄位映射，根據您的實際舊格式調整
+                old_format_mapping = {
+                    "channel_name": "name",
+                    "agency": "company",
+                    "region": "country",
+                    "url": "channel_url",
+                    "service": "platform",
+                }
+
+            logger.info("開始遷移舊格式頻道資料...")
+            migrated_count = 0
+
+            all_channels = list(self.db.channel.find())
+
+            for channel in all_channels:
+                update_data = {}
+                needs_update = False
+
+                # 檢查是否有舊格式欄位需要遷移
+                for old_field, new_field in old_format_mapping.items():
+                    if old_field in channel and new_field not in channel:
+                        update_data[new_field] = channel[old_field]
+                        needs_update = True
+
+                if needs_update:
+                    self.db.channel.update_one({"_id": channel["_id"]}, {"$set": update_data})
+                    migrated_count += 1
+                    logger.debug(f"已遷移頻道資料: {channel.get('name', 'Unknown')}")
+
+            logger.info(f"舊格式資料遷移完成，共遷移了 {migrated_count} 個頻道記錄")
+            return migrated_count
+
+        except Exception as e:
+            logger.error(f"遷移舊格式資料時發生錯誤: {e}")
+            return 0

@@ -161,17 +161,18 @@ class Youtube_webscrap(YoutubeLiveInterface):
                 "timestamp": None,
             }
 
-    def get_channel_info(self, channel_id: str) -> dict[str, Any]:
+    def get_channel_info(self, channel_url: str) -> dict[str, Any]:
         """
         Get channel info using web scraping as a fallback.
 
         Args:
-            channel_id: YouTube channel ID
+            channel_url: YouTube channel URL
 
         Returns:
             Dictionary with channel information
         """
         try:
+            channel_id = extract_channel_id(channel_url)
             url = f"https://www.youtube.com/channel/{channel_id}"
             response = requests.get(url)
 
