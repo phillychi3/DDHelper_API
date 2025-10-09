@@ -128,8 +128,9 @@ def parse_count(count_text: str) -> int:
         Integer value
     """
     try:
-        count_text = "".join(c for c in count_text if c.isdigit() or c in [".", "K", "M", "B"])
-
+        count_text = "".join(
+            c for c in count_text if c.isdigit() or c in [".", "K", "M", "B", "萬"]
+        )
         multiplier = 1
         if "K" in count_text:
             multiplier = 1000
@@ -140,7 +141,10 @@ def parse_count(count_text: str) -> int:
         elif "B" in count_text:
             multiplier = 1000000000
             count_text = count_text.replace("B", "")
+        elif "萬" in count_text:
+            multiplier = 10000
+            count_text = count_text.replace("萬", "")
 
         return int(float(count_text) * multiplier)
-    except:
+    except Exception as _:
         return 0

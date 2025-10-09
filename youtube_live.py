@@ -176,8 +176,12 @@ class Youtube_webscrap(YoutubeLiveInterface):
             url = f"https://www.youtube.com/channel/{channel_id}"
             response = requests.get(url)
 
-            # Extract subscriber count
-            subscriber_pattern = r'"subscriberCountText":\{"simpleText":"(.*?)"'
+            # with open("debug.html", "w", encoding="utf-8") as f:
+            #     f.write(response.text)
+
+            subscriber_pattern = (
+                r'},{"metadataParts":\[{"text":{"content":"(.*?)位訂閱者"},"accessibilityLabel"'
+            )
             subscriber_match = re.search(subscriber_pattern, response.text)
             subscriber_text = subscriber_match.group(1) if subscriber_match else "0"
             subscriber_count = parse_count(subscriber_text)
@@ -211,7 +215,8 @@ class Youtube_webscrap(YoutubeLiveInterface):
             handle = handle_match.group(1) if handle_match else ""
 
             # Try to extract video count
-            video_count_pattern = r'},{"text":{"content":"(.*?) 部影片","styleRuns"'
+            video_count_pattern = r'訂閱者"},{"text":{"content":"(.*?) 部影片","styleRuns":\[{"startIndex":0,"length":8}\]'
+
             video_count_match = re.search(video_count_pattern, response.text)
             video_count = int(video_count_match.group(1)) if video_count_match else 0
 
@@ -381,12 +386,12 @@ class Youtube_webscrap(YoutubeLiveInterface):
 
 if __name__ == "__main__":
     youtube_live = Youtube_webscrap()
-    # channel_url = "https://www.youtube.com/@stringflowers"
+    channel_url = "https://www.youtube.com/channel/UCp6993wxpyDPHUpavwDFqgg"
 
-    # chid = extract_channel_id(channel_url)
-    # test = youtube_live.get_channel_info(chid)
-    # print(test)
+    chid = extract_channel_id(channel_url)
+    test = youtube_live.get_channel_info(chid)
+    print(test)
 
-    video_id = "MUt3DIyXieU"
-    video_details = youtube_live.get_video_details(video_id)
-    print(video_details)
+    # video_id = "MUt3DIyXieU"
+    # video_details = youtube_live.get_video_details(video_id)
+    # print(video_details)
