@@ -65,8 +65,18 @@ class VtuberDatabase:
                 logger.error("Cannot insert channel without channel_url")
                 return False
 
+            existing_channel = self.db.channel.find_one({"channel_url": channel_url})
+
+            update_data = channel_data.copy()
+
+            if existing_channel:
+                if "company" in existing_channel and existing_channel["company"]:
+                    update_data.pop("company", None)
+                if "country" in existing_channel and existing_channel["country"]:
+                    update_data.pop("country", None)
+
             self.db.channel.update_one(
-                {"channel_url": channel_url}, {"$set": channel_data}, upsert=True
+                {"channel_url": channel_url}, {"$set": update_data}, upsert=True
             )
             return True
         except Exception as e:

@@ -6,7 +6,7 @@ from typing import Any
 from googleapiclient.errors import HttpError
 import requests
 
-from vtuber import extract_channel_id
+from vtuber import extract_channel_id, extract_company
 from ytlv import youtube as ytlv_youtube
 from vtuber import parse_count
 
@@ -179,9 +179,7 @@ class Youtube_webscrap(YoutubeLiveInterface):
             # with open("debug.html", "w", encoding="utf-8") as f:
             #     f.write(response.text)
 
-            subscriber_pattern = (
-                r'},{"metadataParts":\[{"text":{"content":"(.*?)位訂閱者"},"accessibilityLabel"'
-            )
+            subscriber_pattern = r']},{"metadataParts":\[{"text":{"((?!.*查看完整播放清單).*?)位訂閱者"},"accessibilityLabel":".*?位訂閱者"'
             subscriber_match = re.search(subscriber_pattern, response.text)
             subscriber_text = subscriber_match.group(1) if subscriber_match else "0"
             subscriber_count = parse_count(subscriber_text)
@@ -232,7 +230,7 @@ class Youtube_webscrap(YoutubeLiveInterface):
                 "subscriber_count": subscriber_count,
                 "hidden_subscriber_count": subscriber_count == 0,
                 "video_count": video_count,
-                "company": "Unknown",  # Need manual categorization
+                "company": extract_company(description),
                 "activity_status": "active",
                 "debut_date": "",  # Can't reliably get this from scraping
                 "platform": "youtube",
@@ -242,13 +240,14 @@ class Youtube_webscrap(YoutubeLiveInterface):
             }
         except Exception as e:
             log.error(f"Error scraping channel {channel_id}: {e}")
-            return {
-                "channel_id": channel_id,
-                "name": "Unknown Channel",
-                "platform": "youtube",
-                "channel_url": f"https://www.youtube.com/{channel_id}",
-                "last_updated": time.time(),
-            }
+            raise e
+            # return {
+            #     "channel_id": channel_id,
+            #     "name": "Unknown Channel",
+            #     "platform": "youtube",
+            #     "channel_url": f"https://www.youtube.com/{channel_id}",
+            #     "last_updated": time.time(),
+            # }
 
     def get_video_details(self, video_id: str) -> dict[str, Any]:
         """
@@ -386,7 +385,7 @@ class Youtube_webscrap(YoutubeLiveInterface):
 
 if __name__ == "__main__":
     youtube_live = Youtube_webscrap()
-    channel_url = "https://www.youtube.com/channel/UCp6993wxpyDPHUpavwDFqgg"
+    channel_url = "https://www.youtube.com/channel/UCdn5BQ06XqgXoAxIhbqw5Rg"
 
     chid = extract_channel_id(channel_url)
     test = youtube_live.get_channel_info(chid)

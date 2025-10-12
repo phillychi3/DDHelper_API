@@ -87,7 +87,7 @@ def extract_channel_mouse_id(channel_url_or_id: str) -> str:
     return channel_url_or_id
 
 
-def extract_company(channel_data: dict[str, Any]) -> str:
+def extract_company(channel_data: str) -> str:
     """
     Try to extract the company from channel data.
 
@@ -97,7 +97,7 @@ def extract_company(channel_data: dict[str, Any]) -> str:
     Returns:
         Company name or "Independent"
     """
-    description = channel_data["snippet"]["description"].lower()
+    description = channel_data.lower()
 
     company_keywords = {
         "hololive": "Hololive",
