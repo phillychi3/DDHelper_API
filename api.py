@@ -60,6 +60,35 @@ class VTuber(BaseModel):
     channel_id: str
 
 
+class VTuberCreate(BaseModel):
+    name: str
+    channel_id: str
+    channel_url: str
+    platform: str = "youtube"
+    company: str = ""
+    country: str = ""
+    subscriber_count: int = 0
+    view_count: int = 0
+    video_count: int = 0
+    activity_status: str = "active"
+    debut_date: str = ""
+    thumbnail: str = ""
+
+
+class VTuberUpdate(BaseModel):
+    name: str | None = None
+    channel_url: str | None = None
+    platform: str | None = None
+    company: str | None = None
+    country: str | None = None
+    subscriber_count: int | None = None
+    view_count: int | None = None
+    video_count: int | None = None
+    activity_status: str | None = None
+    debut_date: str | None = None
+    thumbnail: str | None = None
+
+
 class VideoInfo(BaseModel):
     video_id: str
     title: str
@@ -173,6 +202,69 @@ async def get_vtuber(channel_id: str, db: VtuberDatabase = Depends(get_db)):
         del vtuber["_id"]
 
     return vtuber
+
+
+@app.post("/vtuber", response_model=dict[str, str], tags=["VTubers Management"])
+async def create_vtuber(vtuber: VTuberCreate, db: VtuberDatabase = Depends(get_db)):
+    """Create a new VTuber entry."""
+    # Check if channel already exists
+    existing = db.get_channel(vtuber.channel_id)
+    if existing:
+        raise HTTPException(status_code=400, detail="VTuber with this channel_id already exists")
+
+    # Insert channel
+    channel_data = vtuber.model_dump()
+    success = db.insert_channel(channel_data)
+
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to create VTuber")
+
+    logger.info(f"Created VTuber: {vtuber.name} ({vtuber.channel_id})")
+    return {"message": "VTuber created successfully", "channel_id": vtuber.channel_id}
+
+
+@app.put("/vtuber/{channel_id}", response_model=dict[str, str], tags=["VTubers Management"])
+async def update_vtuber(
+    channel_id: str, vtuber_update: VTuberUpdate, db: VtuberDatabase = Depends(get_db)
+):
+    """Update an existing VTuber entry."""
+    # Check if channel exists
+    existing = db.get_channel(channel_id)
+    if not existing:
+        raise HTTPException(status_code=404, detail="VTuber not found")
+
+    # Filter out None values
+    update_data = {k: v for k, v in vtuber_update.model_dump().items() if v is not None}
+
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No update data provided")
+
+    # Update channel
+    success = db.update_channel_by_id(channel_id, update_data)
+
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to update VTuber")
+
+    logger.info(f"Updated VTuber: {channel_id}")
+    return {"message": "VTuber updated successfully", "channel_id": channel_id}
+
+
+@app.delete("/vtuber/{channel_id}", response_model=dict[str, str], tags=["VTubers Management"])
+async def delete_vtuber(channel_id: str, db: VtuberDatabase = Depends(get_db)):
+    """Delete a VTuber entry."""
+    # Check if channel exists
+    existing = db.get_channel(channel_id)
+    if not existing:
+        raise HTTPException(status_code=404, detail="VTuber not found")
+
+    # Delete channel
+    success = db.delete_channel_by_id(channel_id)
+
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to delete VTuber")
+
+    logger.info(f"Deleted VTuber: {channel_id}")
+    return {"message": "VTuber deleted successfully", "channel_id": channel_id}
 
 
 @app.get("/videos/{channel_id}", response_model=list[VideoInfo], tags=["Videos"])
@@ -301,6 +393,41 @@ async def filter_vtubers(
 async def ping():
     """Simple health check endpoint."""
     return {"status": "ok", "message": "pong"}
+
+
+@app.get("/debug/channel/{channel_id}", tags=["Debug"])
+async def debug_channel(channel_id: str, db: VtuberDatabase = Depends(get_db)):
+    """Debug endpoint to see raw channel data from database."""
+    # Try to find by channel_id
+    raw_data = db.db.channel.find_one({"channel_id": channel_id})
+
+    if not raw_data:
+        # Try to find by channel_url if channel_id lookup fails
+        raw_data = db.db.channel.find_one({"channel_url": channel_id})
+
+    if not raw_data:
+        raise HTTPException(status_code=404, detail="Channel not found")
+
+    # Convert ObjectId to string for JSON serialization
+    if "_id" in raw_data:
+        raw_data["_id"] = str(raw_data["_id"])
+
+    return {"raw_data": raw_data, "message": "This is the raw data from MongoDB"}
+
+
+@app.get("/debug/find-by-url", tags=["Debug"])
+async def debug_find_by_url(url: str, db: VtuberDatabase = Depends(get_db)):
+    """Debug endpoint to find channel by exact channel_url match."""
+    raw_data = db.db.channel.find_one({"channel_url": url})
+
+    if not raw_data:
+        raise HTTPException(status_code=404, detail=f"No channel found with channel_url: {url}")
+
+    # Convert ObjectId to string for JSON serialization
+    if "_id" in raw_data:
+        raw_data["_id"] = str(raw_data["_id"])
+
+    return {"raw_data": raw_data, "message": "Found by channel_url"}
 
 
 def start(host: str = "0.0.0.0", port: int = 7600, debug: bool = False):

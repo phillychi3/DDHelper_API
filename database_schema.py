@@ -1,9 +1,48 @@
 import logging
+import re
 
 from pymongo import ASCENDING, TEXT, IndexModel, MongoClient
 from pymongo.server_api import ServerApi
 
 logger = logging.getLogger("VtuberDatabase")
+
+
+def extract_channel_id_from_url(url_or_id: str) -> str:
+    """
+    Extract channel ID from URL or return ID as-is if already an ID.
+
+    Examples:
+        "UCp6993wxpyDPHUpavwDFqgg" -> "UCp6993wxpyDPHUpavwDFqgg"
+        "https://www.youtube.com/channel/UCp6993wxpyDPHUpavwDFqgg" -> "UCp6993wxpyDPHUpavwDFqgg"
+        "https://www.youtube.com/UCp6993wxpyDPHUpavwDFqgg" -> "UCp6993wxpyDPHUpavwDFqgg"
+        "https://www.youtube.com/@username" -> "username"
+    """
+    if not url_or_id:
+        return ""
+
+    # If it's already a clean ID (starts with UC for YouTube, or no http/https)
+    if not url_or_id.startswith(("http://", "https://")):
+        return url_or_id
+
+    # Extract from YouTube URL
+    # Pattern 1: https://www.youtube.com/channel/CHANNEL_ID or https://www.youtube.com/CHANNEL_ID
+    youtube_match = re.search(r"youtube\.com/(?:channel/)?(UC[\w-]+)", url_or_id)
+    if youtube_match:
+        return youtube_match.group(1)
+
+    # Pattern 2: https://www.youtube.com/@username (custom handle)
+    youtube_handle_match = re.search(r"youtube\.com/@([\w-]+)", url_or_id)
+    if youtube_handle_match:
+        return youtube_handle_match.group(1)
+
+    # Extract from Twitch URL
+    # Pattern: https://www.twitch.tv/USERNAME
+    twitch_match = re.search(r"twitch\.tv/([\w-]+)", url_or_id)
+    if twitch_match:
+        return twitch_match.group(1)
+
+    # If no pattern matches, return as-is
+    return url_or_id
 
 
 class VtuberDatabase:
@@ -69,6 +108,10 @@ class VtuberDatabase:
 
             update_data = channel_data.copy()
 
+            # Clean channel_id to ensure it's not a URL
+            if "channel_id" in update_data:
+                update_data["channel_id"] = extract_channel_id_from_url(update_data["channel_id"])
+
             if existing_channel:
                 if "company" in existing_channel and existing_channel["company"]:
                     update_data.pop("company", None)
@@ -85,7 +128,39 @@ class VtuberDatabase:
 
     def get_channel(self, channel_id):
         """Get a channel from the database by ID."""
-        return self.db.channel.find_one({"channel_id": channel_id})
+        # First try to find with the provided channel_id
+        result = self.db.channel.find_one({"channel_id": channel_id})
+
+        # If not found and channel_id looks like a clean ID (no http/https),
+        # try to find by reconstructing possible URL formats
+        if not result and not channel_id.startswith(("http://", "https://")):
+            # Try to find where channel_id field contains this ID as part of a URL
+            result = self.db.channel.find_one({
+                "$or": [
+                    {"channel_id": f"https://www.youtube.com/{channel_id}"},
+                    {"channel_id": f"https://www.youtube.com/channel/{channel_id}"},
+                    {"channel_id": f"https://www.youtube.com/@{channel_id}"},
+                    {"channel_id": f"https://youtube.com/{channel_id}"},
+                    {"channel_id": f"https://youtube.com/channel/{channel_id}"},
+                    {"channel_id": f"https://youtube.com/@{channel_id}"},
+                ]
+            })
+
+        # If still not found, try to find by extracting ID from channel_url
+        if not result and not channel_id.startswith(("http://", "https://")):
+            # Search all channels and match by extracting ID from channel_url
+            all_channels = self.db.channel.find({"$or": [
+                {"channel_id": ""},
+                {"channel_id": {"$exists": False}}
+            ]})
+            for channel in all_channels:
+                channel_url = channel.get("channel_url", "")
+                if channel_url:
+                    extracted_id = extract_channel_id_from_url(channel_url)
+                    if extracted_id == channel_id:
+                        return channel
+
+        return result
 
     def get_channelurl_list(self):
         """Get a list of all channel URLs."""
@@ -95,6 +170,16 @@ class VtuberDatabase:
         """Get all channels with basic info."""
         vtubers = []
         for i in self.db.channel.find():
+            # Extract clean channel_id (in case it's stored as URL)
+            raw_channel_id = i.get("channel_id", "")
+            clean_channel_id = extract_channel_id_from_url(raw_channel_id)
+
+            # If channel_id is still empty, try to extract from channel_url
+            if not clean_channel_id:
+                channel_url = i.get("channel_url", "")
+                if channel_url:
+                    clean_channel_id = extract_channel_id_from_url(channel_url)
+
             vtubers.append(
                 {
                     "name": i.get("name", ""),
@@ -108,7 +193,7 @@ class VtuberDatabase:
                     "activity_status": i.get("activity_status", ""),
                     "debut_date": i.get("debut_date", ""),
                     "thumbnail": i.get("thumbnail", ""),
-                    "channel_id": i.get("channel_id", ""),
+                    "channel_id": clean_channel_id,
                 }
             )
         return vtubers
@@ -128,6 +213,82 @@ class VtuberDatabase:
     def delete_channel(self, channel):
         """Delete a channel by name."""
         self.db.channel.delete_one({"name": channel})
+
+    def delete_channel_by_id(self, channel_id):
+        """Delete a channel by channel_id."""
+        # First try to delete with the provided channel_id
+        result = self.db.channel.delete_one({"channel_id": channel_id})
+
+        # If nothing was deleted and channel_id looks like a clean ID,
+        # try to find and delete by URL formats
+        if result.deleted_count == 0 and not channel_id.startswith(("http://", "https://")):
+            result = self.db.channel.delete_one({
+                "$or": [
+                    {"channel_id": f"https://www.youtube.com/{channel_id}"},
+                    {"channel_id": f"https://www.youtube.com/channel/{channel_id}"},
+                    {"channel_id": f"https://www.youtube.com/@{channel_id}"},
+                    {"channel_id": f"https://youtube.com/{channel_id}"},
+                    {"channel_id": f"https://youtube.com/channel/{channel_id}"},
+                    {"channel_id": f"https://youtube.com/@{channel_id}"},
+                ]
+            })
+
+        # If still not deleted, try to find by extracting ID from channel_url
+        if result.deleted_count == 0 and not channel_id.startswith(("http://", "https://")):
+            all_channels = self.db.channel.find({"$or": [
+                {"channel_id": ""},
+                {"channel_id": {"$exists": False}}
+            ]})
+            for channel in all_channels:
+                channel_url = channel.get("channel_url", "")
+                if channel_url:
+                    extracted_id = extract_channel_id_from_url(channel_url)
+                    if extracted_id == channel_id:
+                        result = self.db.channel.delete_one({"_id": channel["_id"]})
+                        break
+
+        return result.deleted_count > 0
+
+    def update_channel_by_id(self, channel_id, data):
+        """Update a channel by channel_id."""
+        # First try to update with the provided channel_id
+        result = self.db.channel.update_one({"channel_id": channel_id}, {"$set": data})
+
+        # If nothing was matched and channel_id looks like a clean ID,
+        # try to find and update by URL formats
+        if result.matched_count == 0 and not channel_id.startswith(("http://", "https://")):
+            result = self.db.channel.update_one(
+                {
+                    "$or": [
+                        {"channel_id": f"https://www.youtube.com/{channel_id}"},
+                        {"channel_id": f"https://www.youtube.com/channel/{channel_id}"},
+                        {"channel_id": f"https://www.youtube.com/@{channel_id}"},
+                        {"channel_id": f"https://youtube.com/{channel_id}"},
+                        {"channel_id": f"https://youtube.com/channel/{channel_id}"},
+                        {"channel_id": f"https://youtube.com/@{channel_id}"},
+                    ]
+                },
+                {"$set": data}
+            )
+
+        # If still not matched, try to find by extracting ID from channel_url
+        if result.matched_count == 0 and not channel_id.startswith(("http://", "https://")):
+            all_channels = self.db.channel.find({"$or": [
+                {"channel_id": ""},
+                {"channel_id": {"$exists": False}}
+            ]})
+            for channel in all_channels:
+                channel_url = channel.get("channel_url", "")
+                if channel_url:
+                    extracted_id = extract_channel_id_from_url(channel_url)
+                    if extracted_id == channel_id:
+                        result = self.db.channel.update_one(
+                            {"_id": channel["_id"]},
+                            {"$set": data}
+                        )
+                        break
+
+        return result.modified_count > 0 or result.matched_count > 0
 
     def get_one_channel(self, channel):
         """Get a channel by name."""

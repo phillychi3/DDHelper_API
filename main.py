@@ -1,3 +1,4 @@
+import argparse
 import logging
 import os
 import signal
@@ -12,6 +13,7 @@ from controller import VtuberTrackerControl
 from database_schema import VtuberDatabase
 
 DEBUG = False
+API_ONLY_MODE = False
 
 
 nowpath = os.path.dirname(os.path.abspath(__file__))
@@ -75,10 +77,19 @@ def init_tracker_thread():
     return tracker_thread, tracker_control
 
 
-def main():
-    """Main entry point."""
-    init_api_thread()
-    init_tracker_thread()
+def main(api_only=False):
+    """Main entry point.
+
+    Args:
+        api_only: If True, only start API server without tracker controller
+    """
+    if api_only:
+        logger.info("Starting in API-only mode (tracker disabled)")
+        init_api_thread()
+    else:
+        logger.info("Starting in full mode (API + tracker)")
+        init_api_thread()
+        init_tracker_thread()
 
     try:
         while all_threading:
@@ -89,7 +100,7 @@ def main():
                     if "API_Thread" == t.name:
                         init_api_thread()
                         logger.info("API is restarted")
-                    elif "Tracker_Thread" == t.name:
+                    elif "Tracker_Thread" == t.name and not api_only:
                         init_tracker_thread()
                         logger.info("Tracker is restarted")
 
@@ -103,6 +114,28 @@ def main():
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="VTuber Tracker Service")
+    parser.add_argument(
+        "-a",
+        "--api-only",
+        action="store_true",
+        help="Run in API-only mode (disable tracker controller)",
+    )
+    parser.add_argument(
+        "-d",
+        "--debug",
+        action="store_true",
+        help="Enable debug mode",
+    )
+    args = parser.parse_args()
+
+    if args.debug:
+        DEBUG = True
+        coloredlogs.install(level="DEBUG")
+        logger.setLevel(logging.DEBUG)
+        logger.info("Debug mode enabled")
+
+    api_only_mode = args.api_only or setting.get("api_only_mode", False)
 
     def signal_handler(signal, frame):
         logger.info("Received SIGINT, shutting down")
@@ -110,4 +143,4 @@ if __name__ == "__main__":
         os._exit(0)
 
     signal.signal(signal.SIGINT, signal_handler)
-    main()
+    main(api_only=api_only_mode)
