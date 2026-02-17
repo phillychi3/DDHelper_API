@@ -6,7 +6,8 @@ from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from database_schema import VtuberDatabase
+from database_schema import VtuberDatabase, extract_channel_id_from_url
+from vtuber import extract_channel_id
 
 logger = logging.getLogger("vtuber_api")
 logger.setLevel(logging.INFO)
@@ -110,6 +111,7 @@ class LiveInfo(BaseModel):
     thumbnail: str | None = None
     platform: str
     timestamp: float | None = None
+    vtuber: VTuber | None = None
 
 
 class ControllerStatus(BaseModel):
@@ -169,17 +171,29 @@ async def get_live(
     platform: Platform = Query(Platform.ALL, description="Filter by platform"),
     db: VtuberDatabase = Depends(get_db),
 ):
-    """Get live or scheduled streams."""
+    """Get live or scheduled streams with vtuber data."""
     livedata = list(db.getlivefromstatus(status))
 
     # Filter by platform if needed
     if platform != Platform.ALL:
         livedata = [stream for stream in livedata if stream.get("platform") == platform]
 
-    # Remove MongoDB IDs
-    for page in range(len(livedata)):
-        if "_id" in livedata[page]:
-            del livedata[page]["_id"]
+    # Remove MongoDB IDs and attach vtuber data
+    for stream in livedata:
+        if "_id" in stream:
+            del stream["_id"]
+
+        # Look up vtuber data by channel_url
+        channel_url = stream.get("channel", "")
+        vtuber_data = db.get_channel_by_url(channel_url)
+        if vtuber_data:
+            vtuber_data.pop("_id", None)
+            raw_channel_id = vtuber_data.get("channel_id", "")
+            clean_id = extract_channel_id_from_url(raw_channel_id)
+            if not clean_id:
+                clean_id = extract_channel_id_from_url(vtuber_data.get("channel_url", ""))
+            vtuber_data["channel_id"] = clean_id
+            stream["vtuber"] = vtuber_data
 
     return livedata
 
@@ -207,20 +221,36 @@ async def get_vtuber(channel_id: str, db: VtuberDatabase = Depends(get_db)):
 @app.post("/vtuber", response_model=dict[str, str], tags=["VTubers Management"])
 async def create_vtuber(vtuber: VTuberCreate, db: VtuberDatabase = Depends(get_db)):
     """Create a new VTuber entry."""
-    # Check if channel already exists
-    existing = db.get_channel(vtuber.channel_id)
-    if existing:
-        raise HTTPException(status_code=400, detail="VTuber with this channel_id already exists")
+    # Resolve the real UC channel ID (handles @handle -> UCxxxx conversion)
+    real_channel_id = extract_channel_id(vtuber.channel_id)
 
-    # Insert channel
+    # Multi-method duplicate check
+    existing = db.get_channel(real_channel_id)
+
+    if not existing:
+        existing = db.get_channel_by_url(vtuber.channel_url)
+
+    if not existing and "@" in vtuber.channel_id:
+        handle = vtuber.channel_id.lstrip("@")
+        existing = db.find_channel_by_handle(handle)
+
+    if existing:
+        existing_name = existing.get("name", "Unknown")
+        raise HTTPException(
+            status_code=400,
+            detail=f"VTuber already exists: {existing_name} (matched by channel_id or handle)",
+        )
+
+    # Insert channel with resolved channel_id
     channel_data = vtuber.model_dump()
+    channel_data["channel_id"] = real_channel_id
     success = db.insert_channel(channel_data)
 
     if not success:
         raise HTTPException(status_code=500, detail="Failed to create VTuber")
 
-    logger.info(f"Created VTuber: {vtuber.name} ({vtuber.channel_id})")
-    return {"message": "VTuber created successfully", "channel_id": vtuber.channel_id}
+    logger.info(f"Created VTuber: {vtuber.name} ({real_channel_id})")
+    return {"message": "VTuber created successfully", "channel_id": real_channel_id}
 
 
 @app.put("/vtuber/{channel_id}", response_model=dict[str, str], tags=["VTubers Management"])

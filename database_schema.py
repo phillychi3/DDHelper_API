@@ -290,6 +290,32 @@ class VtuberDatabase:
 
         return result.modified_count > 0 or result.matched_count > 0
 
+    def update_channel_by_url(self, channel_url, data):
+        """Update a channel by channel_url with specific fields."""
+        try:
+            result = self.db.channel.update_one(
+                {"channel_url": channel_url}, {"$set": data}
+            )
+            return result.matched_count > 0
+        except Exception as e:
+            logger.error(f"Error updating channel by URL: {e}")
+            return False
+
+    def get_channel_by_url(self, channel_url):
+        """Get a channel from the database by channel_url."""
+        return self.db.channel.find_one({"channel_url": channel_url})
+
+    def find_channel_by_handle(self, handle):
+        """Find a channel by handle or custom_url field."""
+        return self.db.channel.find_one({
+            "$or": [
+                {"handle": handle},
+                {"custom_url": f"@{handle}"},
+                {"handle": handle.lstrip("@")},
+                {"custom_url": handle},
+            ]
+        })
+
     def get_one_channel(self, channel):
         """Get a channel by name."""
         return self.db.channel.find_one({"name": channel})

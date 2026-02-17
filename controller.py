@@ -214,9 +214,14 @@ class VtuberTrackerControl:
                 try:
                     channel_data = Youtube_webscrap().get_channel_info(channel_url)
                     if channel_data:
-                        self.db.insert_channel(channel_data)
+                        update_fields = {
+                            "subscriber_count": channel_data.get("subscriber_count", 0),
+                            "view_count": channel_data.get("view_count", 0),
+                            "video_count": channel_data.get("video_count", 0),
+                        }
+                        self.db.update_channel_by_url(channel_url, update_fields)
                         update_count += 1
-                        log.debug(f"Updated channel data for {channel_data['channel_url']}")
+                        log.debug(f"Updated channel stats for {channel_url}")
                 except Exception as e:
                     log.error(f"Error updating individual channel {channel_url}: {e}")
                 await asyncio.sleep(0.5)
