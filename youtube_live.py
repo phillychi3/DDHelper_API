@@ -1,6 +1,7 @@
 import logging
 import re
 import time
+import traceback
 from typing import Any
 
 from googleapiclient.errors import HttpError
@@ -157,7 +158,7 @@ class Youtube_webscrap(YoutubeLiveInterface):
 
                 return live_dict
             except Exception as e:
-                log.error(f"Error with pure scraping for YouTube: {e}")
+                log.error(f"Error with pure scraping for YouTube ({channel_url}): {e}\n{traceback.format_exc()}")
                 return {
                     "status": None,
                     "channel": channel_url,
