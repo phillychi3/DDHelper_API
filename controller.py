@@ -61,7 +61,9 @@ class VtuberTrackerControl:
             "last_channel_update": None,
         }
 
-        time.sleep(3)
+    def start(self):
+        """Start the tracker event loop (blocking)."""
+        time.sleep(1)
         self.mainloop.create_task(self.start_getdata())
         self.mainloop.create_task(self.check_readylist())
         self.mainloop.create_task(self.schedule_channel_update())
@@ -333,7 +335,9 @@ class VtuberTrackerControl:
                 res = await self.check_live_status(channel_url)
 
                 if res is None:
-                    log.warning(f"check_live_status returned None for {channel_url} on retry {i + 1}, skipping")
+                    log.warning(
+                        f"check_live_status returned None for {channel_url} on retry {i + 1}, skipping"
+                    )
                     await asyncio.sleep(60)
                     continue
                 if res["status"] == "LIVE":
@@ -342,9 +346,7 @@ class VtuberTrackerControl:
                     self.db.update_live(result["channel"], res)
                     return
                 await asyncio.sleep(60)
-            log.info(
-                f"{channel_url} did not go live within retry window, removing from ready list"
-            )
+            log.info(f"{channel_url} did not go live within retry window, removing from ready list")
             self.readylive.discard(result["channel"])
             if res is not None:
                 self.db.update_live(result["channel"], res)

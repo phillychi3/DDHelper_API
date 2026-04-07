@@ -135,24 +135,25 @@ class VtuberDatabase:
         # try to find by reconstructing possible URL formats
         if not result and not channel_id.startswith(("http://", "https://")):
             # Try to find where channel_id field contains this ID as part of a URL
-            result = self.db.channel.find_one({
-                "$or": [
-                    {"channel_id": f"https://www.youtube.com/{channel_id}"},
-                    {"channel_id": f"https://www.youtube.com/channel/{channel_id}"},
-                    {"channel_id": f"https://www.youtube.com/@{channel_id}"},
-                    {"channel_id": f"https://youtube.com/{channel_id}"},
-                    {"channel_id": f"https://youtube.com/channel/{channel_id}"},
-                    {"channel_id": f"https://youtube.com/@{channel_id}"},
-                ]
-            })
+            result = self.db.channel.find_one(
+                {
+                    "$or": [
+                        {"channel_id": f"https://www.youtube.com/{channel_id}"},
+                        {"channel_id": f"https://www.youtube.com/channel/{channel_id}"},
+                        {"channel_id": f"https://www.youtube.com/@{channel_id}"},
+                        {"channel_id": f"https://youtube.com/{channel_id}"},
+                        {"channel_id": f"https://youtube.com/channel/{channel_id}"},
+                        {"channel_id": f"https://youtube.com/@{channel_id}"},
+                    ]
+                }
+            )
 
         # If still not found, try to find by extracting ID from channel_url
         if not result and not channel_id.startswith(("http://", "https://")):
             # Search all channels and match by extracting ID from channel_url
-            all_channels = self.db.channel.find({"$or": [
-                {"channel_id": ""},
-                {"channel_id": {"$exists": False}}
-            ]})
+            all_channels = self.db.channel.find(
+                {"$or": [{"channel_id": ""}, {"channel_id": {"$exists": False}}]}
+            )
             for channel in all_channels:
                 channel_url = channel.get("channel_url", "")
                 if channel_url:
@@ -222,23 +223,24 @@ class VtuberDatabase:
         # If nothing was deleted and channel_id looks like a clean ID,
         # try to find and delete by URL formats
         if result.deleted_count == 0 and not channel_id.startswith(("http://", "https://")):
-            result = self.db.channel.delete_one({
-                "$or": [
-                    {"channel_id": f"https://www.youtube.com/{channel_id}"},
-                    {"channel_id": f"https://www.youtube.com/channel/{channel_id}"},
-                    {"channel_id": f"https://www.youtube.com/@{channel_id}"},
-                    {"channel_id": f"https://youtube.com/{channel_id}"},
-                    {"channel_id": f"https://youtube.com/channel/{channel_id}"},
-                    {"channel_id": f"https://youtube.com/@{channel_id}"},
-                ]
-            })
+            result = self.db.channel.delete_one(
+                {
+                    "$or": [
+                        {"channel_id": f"https://www.youtube.com/{channel_id}"},
+                        {"channel_id": f"https://www.youtube.com/channel/{channel_id}"},
+                        {"channel_id": f"https://www.youtube.com/@{channel_id}"},
+                        {"channel_id": f"https://youtube.com/{channel_id}"},
+                        {"channel_id": f"https://youtube.com/channel/{channel_id}"},
+                        {"channel_id": f"https://youtube.com/@{channel_id}"},
+                    ]
+                }
+            )
 
         # If still not deleted, try to find by extracting ID from channel_url
         if result.deleted_count == 0 and not channel_id.startswith(("http://", "https://")):
-            all_channels = self.db.channel.find({"$or": [
-                {"channel_id": ""},
-                {"channel_id": {"$exists": False}}
-            ]})
+            all_channels = self.db.channel.find(
+                {"$or": [{"channel_id": ""}, {"channel_id": {"$exists": False}}]}
+            )
             for channel in all_channels:
                 channel_url = channel.get("channel_url", "")
                 if channel_url:
@@ -268,24 +270,20 @@ class VtuberDatabase:
                         {"channel_id": f"https://youtube.com/@{channel_id}"},
                     ]
                 },
-                {"$set": data}
+                {"$set": data},
             )
 
         # If still not matched, try to find by extracting ID from channel_url
         if result.matched_count == 0 and not channel_id.startswith(("http://", "https://")):
-            all_channels = self.db.channel.find({"$or": [
-                {"channel_id": ""},
-                {"channel_id": {"$exists": False}}
-            ]})
+            all_channels = self.db.channel.find(
+                {"$or": [{"channel_id": ""}, {"channel_id": {"$exists": False}}]}
+            )
             for channel in all_channels:
                 channel_url = channel.get("channel_url", "")
                 if channel_url:
                     extracted_id = extract_channel_id_from_url(channel_url)
                     if extracted_id == channel_id:
-                        result = self.db.channel.update_one(
-                            {"_id": channel["_id"]},
-                            {"$set": data}
-                        )
+                        result = self.db.channel.update_one({"_id": channel["_id"]}, {"$set": data})
                         break
 
         return result.modified_count > 0 or result.matched_count > 0
@@ -293,9 +291,7 @@ class VtuberDatabase:
     def update_channel_by_url(self, channel_url, data):
         """Update a channel by channel_url with specific fields."""
         try:
-            result = self.db.channel.update_one(
-                {"channel_url": channel_url}, {"$set": data}
-            )
+            result = self.db.channel.update_one({"channel_url": channel_url}, {"$set": data})
             return result.matched_count > 0
         except Exception as e:
             logger.error(f"Error updating channel by URL: {e}")
@@ -307,14 +303,16 @@ class VtuberDatabase:
 
     def find_channel_by_handle(self, handle):
         """Find a channel by handle or custom_url field."""
-        return self.db.channel.find_one({
-            "$or": [
-                {"handle": handle},
-                {"custom_url": f"@{handle}"},
-                {"handle": handle.lstrip("@")},
-                {"custom_url": handle},
-            ]
-        })
+        return self.db.channel.find_one(
+            {
+                "$or": [
+                    {"handle": handle},
+                    {"custom_url": f"@{handle}"},
+                    {"handle": handle.lstrip("@")},
+                    {"custom_url": handle},
+                ]
+            }
+        )
 
     def get_one_channel(self, channel):
         """Get a channel by name."""
@@ -354,6 +352,10 @@ class VtuberDatabase:
     def get_one_live(self, channel):
         """Get live status for a channel."""
         return self.live_db.live.find_one({"channel": channel})
+
+    def get_all_live(self):
+        """Get live status for all channels."""
+        return self.live_db.live.find()
 
     def getlivefromstatus(self, status):
         """Get all channels with a specific live status."""

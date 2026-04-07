@@ -68,9 +68,7 @@ def init_tracker_thread():
 
     api.init_api(db, tracker_control)
 
-    tracker_thread = threading.Thread(
-        target=lambda: tracker_control, args=(), name="Tracker_Thread"
-    )
+    tracker_thread = threading.Thread(target=tracker_control.start, name="Tracker_Thread")
     tracker_thread.daemon = True
     tracker_thread.start()
     all_threading.append(tracker_thread)

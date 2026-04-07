@@ -37,6 +37,7 @@ collector = None
 class LiveStatus(str, Enum):
     LIVE = "LIVE"
     READY_TO_LIVE = "READY_TO_LIVE"
+    ALL = "ALL"
 
 
 class Platform(str, Enum):
@@ -167,12 +168,15 @@ async def get_controller_status(controller=Depends(get_controller)):
 
 @app.get("/live", response_model=list[LiveInfo], tags=["Live Streams"])
 async def get_live(
-    status: LiveStatus = Query(LiveStatus.LIVE, description="Filter by live status"),
+    status: LiveStatus = Query(LiveStatus.ALL, description="Filter by live status"),
     platform: Platform = Query(Platform.ALL, description="Filter by platform"),
     db: VtuberDatabase = Depends(get_db),
 ):
     """Get live or scheduled streams with vtuber data."""
-    livedata = list(db.getlivefromstatus(status))
+    if status == LiveStatus.ALL:
+        livedata = list(db.get_all_live())
+    else:
+        livedata = list(db.getlivefromstatus(status))
 
     # Filter by platform if needed
     if platform != Platform.ALL:
