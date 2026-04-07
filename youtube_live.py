@@ -102,8 +102,10 @@ class Youtube_api(YoutubeLiveInterface):
                 self.controller.api_quota_exceeded = True
             else:
                 log.error(f"YouTube API error: {e}")
+            return {"status": None, "channel": channel_url, "platform": "youtube", "timestamp": None}
         except Exception as e:
             log.error(f"Error using YouTube API to check live status for {channel_id}: {e}")
+            return {"status": None, "channel": channel_url, "platform": "youtube", "timestamp": None}
 
 
 class Youtube_webscrap(YoutubeLiveInterface):

@@ -134,7 +134,18 @@ class VtuberTrackerControl:
                 log.info("No channels to check")
             else:
                 log.info(f"Checking {len(checklist)} channels")
-                await self.run(checklist)
+                try:
+                    await self.run(checklist)
+                except Exception as e:
+                    log.error(f"Error during live status check: {e}")
+                    error_info = {
+                        "timestamp": time.time(),
+                        "error": str(e),
+                        "traceback": traceback.format_exc(),
+                    }
+                    self.status["errors"].append(error_info)
+                    if len(self.status["errors"]) > 10:
+                        self.status["errors"].pop(0)
 
             endtime = time.time()
             self.status["last_check_end"] = endtime
@@ -199,7 +210,10 @@ class VtuberTrackerControl:
 
             if nolivelist:
                 log.info(f"Removing {len(nolivelist)} channels from live database")
-                self.db.clean_nolive(nolivelist)
+                try:
+                    self.db.clean_nolive(nolivelist)
+                except Exception as e:
+                    log.error(f"Failed to clean nolive channels from database: {e}")
 
         self.status["checked_channels"] = len(checklist)
 
@@ -285,8 +299,8 @@ class VtuberTrackerControl:
             for channel_url in cplist:
                 res = await self.check_live_status(channel_url)
 
-                if res["status"] is None:
-                    self.readylive.remove(channel_url)
+                if res is None or res["status"] is None:
+                    self.readylive.discard(channel_url)
                     log.warning(f"{channel_url} is no longer scheduled, removing from ready list")
 
             await asyncio.sleep(3600)
@@ -305,6 +319,9 @@ class VtuberTrackerControl:
         await asyncio.sleep(wait_time)
         channel_url = result["channel"]
         res = await self.check_live_status(channel_url)
+        if res is None:
+            log.warning(f"check_live_status returned None for {channel_url}, skipping")
+            return
         if res["status"] == "LIVE":
             log.info(f"{res['channel']} is now live")
             self.readylive.remove(result["channel"])
@@ -315,6 +332,10 @@ class VtuberTrackerControl:
             for i in range(10):
                 res = await self.check_live_status(channel_url)
 
+                if res is None:
+                    log.warning(f"check_live_status returned None for {channel_url} on retry {i + 1}, skipping")
+                    await asyncio.sleep(60)
+                    continue
                 if res["status"] == "LIVE":
                     log.info(f"{res['channel']} is now live after retry {i + 1}")
                     self.readylive.remove(result["channel"])
@@ -322,7 +343,8 @@ class VtuberTrackerControl:
                     return
                 await asyncio.sleep(60)
             log.info(
-                f"{res['channel']} did not go live within retry window, removing from ready list"
+                f"{channel_url} did not go live within retry window, removing from ready list"
             )
-            self.readylive.remove(result["channel"])
-            self.db.update_live(result["channel"], res)
+            self.readylive.discard(result["channel"])
+            if res is not None:
+                self.db.update_live(result["channel"], res)
