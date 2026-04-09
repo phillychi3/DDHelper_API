@@ -173,17 +173,28 @@ class VtuberTrackerControl:
             self.status["current_channel"] = channel_url
             self.status["checked_channels"] = i
             await asyncio.sleep(0.2)
-            tasks.append(asyncio.create_task(self.check_live_status(channel_url)))
+            task = asyncio.create_task(
+                asyncio.wait_for(self.check_live_status(channel_url), timeout=60)
+            )
+            tasks.append(task)
 
         if tasks:
             nolivelist = []
-            results, _ = await asyncio.wait(tasks, return_when=asyncio.ALL_COMPLETED)
+            batch_timeout = max(120, len(checklist) * 2)
+            done, pending = await asyncio.wait(tasks, timeout=batch_timeout, return_when=asyncio.ALL_COMPLETED)
+            for task in pending:
+                log.warning(f"Task timed out after {batch_timeout}s, cancelling")
+                task.cancel()
+            results = done
             for result in results:
                 try:
                     result_data = result.result()
                     if result_data is None:
                         log.warning(f"Result is None for {result}")
                         continue
+                except asyncio.TimeoutError:
+                    log.warning(f"Channel check timed out, skipping")
+                    continue
                     if result_data["status"] == "LIVE":
                         log.info(f"{result_data['channel']} is live")
                     elif result_data["status"] == "READY_TO_LIVE":

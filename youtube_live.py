@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import re
 import time
@@ -28,6 +29,7 @@ class Youtube_api(YoutubeLiveInterface):
             self.youtube_api = api
 
     async def check(self, channel_url):
+        loop = asyncio.get_event_loop()
         try:
             channel_id = extract_channel_id(channel_url)
             log.debug(f"Using YouTube API to check live status for {channel_id}")
@@ -39,7 +41,7 @@ class Youtube_api(YoutubeLiveInterface):
                 type="video",
                 maxResults=1,
             )
-            live_response = live_request.execute()
+            live_response = await loop.run_in_executor(None, live_request.execute)
 
             if len(live_response.get("items", [])) > 0:
                 live_video = live_response["items"][0]
@@ -61,7 +63,7 @@ class Youtube_api(YoutubeLiveInterface):
                 type="video",
                 maxResults=1,
             )
-            upcoming_response = upcoming_request.execute()
+            upcoming_response = await loop.run_in_executor(None, upcoming_request.execute)
 
             if len(upcoming_response.get("items", [])) > 0:
                 upcoming_video = upcoming_response["items"][0]
@@ -69,7 +71,7 @@ class Youtube_api(YoutubeLiveInterface):
                 video_request = self.youtube_api.videos().list(
                     part="liveStreamingDetails", id=upcoming_video["id"]["videoId"]
                 )
-                video_response = video_request.execute()
+                video_response = await loop.run_in_executor(None, video_request.execute)
 
                 if "items" in video_response and video_response["items"]:
                     scheduled_time = video_response["items"][0]["liveStreamingDetails"][
@@ -122,10 +124,11 @@ class Youtube_api(YoutubeLiveInterface):
 class Youtube_webscrap(YoutubeLiveInterface):
     async def check(self, channel_url):
         """Fallback to scraping method when API is unavailable or quota exceeded."""
+        loop = asyncio.get_event_loop()
         try:
             log.debug(f"Using pure scraping method to check live status for {channel_url}")
             try:
-                live_data = ytlv_youtube(channel_url)
+                live_data = await loop.run_in_executor(None, ytlv_youtube, channel_url)
 
                 status = getattr(live_data, "status", None)
                 timestamp = getattr(live_data, "timestamp", None)
