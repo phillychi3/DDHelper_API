@@ -237,9 +237,12 @@ class VtuberTrackerControl:
             old_channel_count = len(self.channel_list)
             self.channel_list = self.db.get_channelurl_list()
             update_count = 0
+            loop = asyncio.get_event_loop()
             for channel_url in self.channel_list:
                 try:
-                    channel_data = Youtube_webscrap().get_channel_info(channel_url)
+                    channel_data = await loop.run_in_executor(
+                        None, Youtube_webscrap().get_channel_info, channel_url
+                    )
                     if channel_data:
                         update_fields = {
                             "subscriber_count": channel_data.get("subscriber_count", 0),
@@ -294,14 +297,13 @@ class VtuberTrackerControl:
                     "timestamp": None,
                 }
 
-        should_use_api = (
-            not self.api_quota_exceeded
-            and self.api_units_used_today < self.max_api_units_per_day
-            and self.youtube_api is not None
-        )
-
-        if should_use_api:
-            return await Youtube_api(self, self.youtube_api).check(channel_url)
+        # should_use_api = (
+        #     not self.api_quota_exceeded
+        #     and self.api_units_used_today < self.max_api_units_per_day
+        #     and self.youtube_api is not None
+        # )
+        # if should_use_api:
+        #     return await Youtube_api(self, self.youtube_api).check(channel_url)
         return await Youtube_webscrap().check(channel_url)
 
     async def check_readylist(self):

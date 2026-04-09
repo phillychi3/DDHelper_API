@@ -190,7 +190,7 @@ class Youtube_webscrap(YoutubeLiveInterface):
         try:
             channel_id = extract_channel_id(channel_url)
             url = f"https://www.youtube.com/channel/{channel_id}"
-            response = requests.get(url)
+            response = requests.get(url, timeout=30)
 
             # with open("debug.html", "w", encoding="utf-8") as f:
             #     f.write(response.text)
@@ -277,7 +277,7 @@ class Youtube_webscrap(YoutubeLiveInterface):
         """
         try:
             url = f"https://www.youtube.com/watch?v={video_id}"
-            response = requests.get(url)
+            response = requests.get(url, timeout=30)
 
             # Extract basic info
             title_pattern = r'<meta name="title" content="(.*?)">'

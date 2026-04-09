@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import time
 
@@ -19,7 +20,8 @@ class Twitch_Live_webscrap(TwitchLiveInterface):
             else:
                 channel_url = channel_url_or_name
 
-            twitch_data = twitch(channel_url)
+            loop = asyncio.get_event_loop()
+            twitch_data = await loop.run_in_executor(None, twitch, channel_url)
 
             live_dict = {
                 "status": "LIVE" if twitch_data.islive else None,
