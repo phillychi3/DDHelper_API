@@ -468,4 +468,4 @@ def start(host: str = "0.0.0.0", port: int = 7600, debug: bool = False):
     """Start the FastAPI server."""
     import uvicorn
 
-    uvicorn.run(app, host=host, port=port, log_level="info", reload=debug)
+    uvicorn.run(app, host=host, port=port, log_level="debug" if debug else "info")

@@ -189,26 +189,9 @@ class VtuberTrackerControl:
             for result in results:
                 try:
                     result_data = result.result()
-                    if result_data is None:
-                        log.warning(f"Result is None for {result}")
-                        continue
-                except asyncio.TimeoutError:
-                    log.warning(f"Channel check timed out, skipping")
+                except TimeoutError:
+                    log.warning("Channel check timed out, skipping")
                     continue
-                    if result_data["status"] == "LIVE":
-                        log.info(f"{result_data['channel']} is live")
-                    elif result_data["status"] == "READY_TO_LIVE":
-                        self.readylive.add(result_data["channel"])
-                        log.info(f"{result_data['channel']} is scheduled to go live")
-                        self.mainloop.create_task(self.wait_live(result_data))
-                    elif result_data["status"] is None:
-                        nolivelist.append(result_data["channel"])
-                        continue
-                    else:
-                        log.error(f"Unexpected status for {result_data['channel']}")
-                        continue
-
-                    self.db.update_live(result_data["channel"], result_data)
                 except Exception as e:
                     log.error(f"Error processing live status result: {e}")
                     error_info = {
@@ -219,7 +202,26 @@ class VtuberTrackerControl:
                     self.status["errors"].append(error_info)
                     if len(self.status["errors"]) > 10:
                         self.status["errors"].pop(0)
-                    # traceback.print_exc()
+                    continue
+
+                if result_data is None:
+                    log.warning(f"Result is None for {result}")
+                    continue
+
+                if result_data["status"] == "LIVE":
+                    log.info(f"{result_data['channel']} is live")
+                elif result_data["status"] == "READY_TO_LIVE":
+                    self.readylive.add(result_data["channel"])
+                    log.info(f"{result_data['channel']} is scheduled to go live")
+                    self.mainloop.create_task(self.wait_live(result_data))
+                elif result_data["status"] is None:
+                    nolivelist.append(result_data["channel"])
+                    continue
+                else:
+                    log.error(f"Unexpected status for {result_data['channel']}")
+                    continue
+
+                self.db.update_live(result_data["channel"], result_data)
 
             if nolivelist:
                 log.info(f"Removing {len(nolivelist)} channels from live database")

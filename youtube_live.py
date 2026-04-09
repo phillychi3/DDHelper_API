@@ -129,6 +129,7 @@ class Youtube_webscrap(YoutubeLiveInterface):
             log.debug(f"Using pure scraping method to check live status for {channel_url}")
             try:
                 live_data = await loop.run_in_executor(None, ytlv_youtube, channel_url)
+                log.debug(f"ytlv raw response for {channel_url}: {live_data}")
 
                 status = getattr(live_data, "status", None)
                 timestamp = getattr(live_data, "timestamp", None)
@@ -159,6 +160,7 @@ class Youtube_webscrap(YoutubeLiveInterface):
                     video_id = link.split("v=")[1].split("&")[0]
                     live_dict["video_id"] = video_id
 
+                log.debug(f"Scraping result for {channel_url}: {live_dict}")
                 return live_dict
             except Exception as e:
                 log.error(f"Error with pure scraping for YouTube ({channel_url}): {e}\n{traceback.format_exc()}")
