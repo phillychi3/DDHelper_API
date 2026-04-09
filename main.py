@@ -5,6 +5,12 @@ import signal
 import threading
 import time
 
+# Force IPv4
+import urllib3.util.connection
+
+urllib3.util.connection.HAS_IPV6 = False
+
+
 import coloredlogs
 import yaml
 
