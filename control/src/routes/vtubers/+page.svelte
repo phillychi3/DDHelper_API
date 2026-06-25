@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import type { VTuber, VTuberCreate, VTuberUpdate } from '$lib/api';
-	import { getAllVTubers, createVTuber, updateVTuber, deleteVTuber } from '$lib/api';
+	import type { VTuber, VTuberCreate, VTuberUpdate, Company, Country } from '$lib/api';
+	import { getAllVTubers, createVTuber, updateVTuber, deleteVTuber, getAllCompanies, getAllCountries } from '$lib/api';
 
 	// State
 	let vtubers = $state<VTuber[]>([]);
+	let companies = $state<Company[]>([]);
+	let countryList = $state<Country[]>([]);
 	let loading = $state(true);
 	let error = $state<string | null>(null);
 	let searchQuery = $state('');
@@ -64,7 +66,7 @@
 		try {
 			loading = true;
 			error = null;
-			vtubers = await getAllVTubers();
+			[vtubers, companies, countryList] = await Promise.all([getAllVTubers(), getAllCompanies(), getAllCountries()]);
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to load VTubers';
 		} finally {
@@ -373,19 +375,27 @@
 					<div class="grid grid-cols-2 gap-4">
 						<div>
 							<label class="block text-sm font-medium text-gray-700 mb-1">公司</label>
-							<input
-								type="text"
+							<select
 								bind:value={formData.company}
 								class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-							/>
+							>
+								<option value="">— 無 —</option>
+								{#each companies as company}
+									<option value={company.name}>{company.name}</option>
+								{/each}
+							</select>
 						</div>
 						<div>
 							<label class="block text-sm font-medium text-gray-700 mb-1">國家</label>
-							<input
-								type="text"
+							<select
 								bind:value={formData.country}
 								class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-							/>
+							>
+								<option value="">— 無 —</option>
+								{#each countryList as c}
+									<option value={c.name}>{c.name}</option>
+								{/each}
+							</select>
 						</div>
 					</div>
 
@@ -523,19 +533,27 @@
 					<div class="grid grid-cols-2 gap-4">
 						<div>
 							<label class="block text-sm font-medium text-gray-700 mb-1">公司</label>
-							<input
-								type="text"
+							<select
 								bind:value={formData.company}
 								class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-							/>
+							>
+								<option value="">— 無 —</option>
+								{#each companies as company}
+									<option value={company.name}>{company.name}</option>
+								{/each}
+							</select>
 						</div>
 						<div>
 							<label class="block text-sm font-medium text-gray-700 mb-1">國家</label>
-							<input
-								type="text"
+							<select
 								bind:value={formData.country}
 								class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-							/>
+							>
+								<option value="">— 無 —</option>
+								{#each countryList as c}
+									<option value={c.name}>{c.name}</option>
+								{/each}
+							</select>
 						</div>
 					</div>
 

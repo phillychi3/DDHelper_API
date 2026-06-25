@@ -67,6 +67,16 @@ class VtuberDatabase:
 
             self.db.channel.create_indexes(channel_indexes)
 
+        # Companies collection
+        if "companies" not in self.db.list_collection_names():
+            self.db.create_collection("companies")
+            self.db.companies.create_index([("name", ASCENDING)], unique=True)
+
+        # Countries collection
+        if "countries" not in self.db.list_collection_names():
+            self.db.create_collection("countries")
+            self.db.countries.create_index([("name", ASCENDING)], unique=True)
+
         # Videos collection
         if "videos" not in self.db.list_collection_names():
             self.db.create_collection("videos")
@@ -392,6 +402,203 @@ class VtuberDatabase:
         return list(
             self.db.videos.find({"collaborators.channel_id": channel_id}).skip(skip).limit(limit)
         )
+
+    # ── Company management ────────────────────────────────────────────────────
+
+    def get_all_companies(self):
+        """Return all companies with their vtuber counts."""
+        companies = list(self.db.companies.find({}, {"_id": 0}))
+        for company in companies:
+            company["vtuber_count"] = self.db.channel.count_documents(
+                {"company": company["name"]}
+            )
+        return companies
+
+    def create_company(self, name: str, youtube: str = "", twitter: str = "") -> bool:
+        try:
+            self.db.companies.insert_one({"name": name, "youtube": youtube, "twitter": twitter})
+            return True
+        except Exception as e:
+            logger.error(f"Error creating company: {e}")
+            return False
+
+    def update_company(self, old_name: str, new_name: str | None, youtube: str | None, twitter: str | None) -> bool:
+        try:
+            update_data = {}
+            if new_name is not None:
+                update_data["name"] = new_name
+            if youtube is not None:
+                update_data["youtube"] = youtube
+            if twitter is not None:
+                update_data["twitter"] = twitter
+            if not update_data:
+                return False
+            result = self.db.companies.update_one({"name": old_name}, {"$set": update_data})
+            if new_name and new_name != old_name:
+                self.db.channel.update_many({"company": old_name}, {"$set": {"company": new_name}})
+            return result.matched_count > 0
+        except Exception as e:
+            logger.error(f"Error updating company: {e}")
+            return False
+
+    def delete_company(self, name: str) -> bool:
+        try:
+            result = self.db.companies.delete_one({"name": name})
+            self.db.channel.update_many({"company": name}, {"$set": {"company": ""}})
+            return result.deleted_count > 0
+        except Exception as e:
+            logger.error(f"Error deleting company: {e}")
+            return False
+
+    def get_company_vtubers(self, company_name: str):
+        """Get all vtubers belonging to a company."""
+        channels = list(self.db.channel.find({"company": company_name}))
+        result = []
+        for i in channels:
+            raw_channel_id = i.get("channel_id", "")
+            clean_channel_id = extract_channel_id_from_url(raw_channel_id)
+            if not clean_channel_id:
+                clean_channel_id = extract_channel_id_from_url(i.get("channel_url", ""))
+            result.append(
+                {
+                    "name": i.get("name", ""),
+                    "company": i.get("company", ""),
+                    "country": i.get("country", ""),
+                    "channel_url": i.get("channel_url", ""),
+                    "platform": i.get("platform", ""),
+                    "subscriber_count": i.get("subscriber_count", 0),
+                    "view_count": i.get("view_count", 0),
+                    "video_count": i.get("video_count", 0),
+                    "activity_status": i.get("activity_status", ""),
+                    "debut_date": i.get("debut_date", ""),
+                    "thumbnail": i.get("thumbnail", ""),
+                    "channel_id": clean_channel_id,
+                }
+            )
+        return result
+
+    def batch_assign_company(self, company_name: str, channel_ids: list) -> dict:
+        """Set exactly `channel_ids` as members of `company_name`; clear others."""
+        clean_ids_set = set(channel_ids)
+        all_channels = list(self.db.channel.find({}, {"_id": 1, "channel_id": 1, "channel_url": 1, "company": 1}))
+
+        to_assign = []
+        to_clear = []
+        for ch in all_channels:
+            raw_id = ch.get("channel_id", "")
+            clean_id = extract_channel_id_from_url(raw_id)
+            if not clean_id:
+                clean_id = extract_channel_id_from_url(ch.get("channel_url", ""))
+            if clean_id in clean_ids_set:
+                to_assign.append(ch["_id"])
+            elif ch.get("company") == company_name:
+                to_clear.append(ch["_id"])
+
+        assigned = 0
+        unassigned = 0
+        if to_assign:
+            res = self.db.channel.update_many({"_id": {"$in": to_assign}}, {"$set": {"company": company_name}})
+            assigned = res.modified_count
+        if to_clear:
+            res2 = self.db.channel.update_many({"_id": {"$in": to_clear}}, {"$set": {"company": ""}})
+            unassigned = res2.modified_count
+        return {"assigned": assigned, "unassigned": unassigned}
+
+    # ── Country management ────────────────────────────────────────────────────
+
+    def get_all_countries(self):
+        """Return all countries with their vtuber counts."""
+        countries = list(self.db.countries.find({}, {"_id": 0}))
+        for country in countries:
+            country["vtuber_count"] = self.db.channel.count_documents(
+                {"country": country["name"]}
+            )
+        return countries
+
+    def create_country(self, name: str) -> bool:
+        try:
+            self.db.countries.insert_one({"name": name})
+            return True
+        except Exception as e:
+            logger.error(f"Error creating country: {e}")
+            return False
+
+    def update_country(self, old_name: str, new_name: str | None) -> bool:
+        try:
+            if new_name is None:
+                return False
+            result = self.db.countries.update_one({"name": old_name}, {"$set": {"name": new_name}})
+            if new_name != old_name:
+                self.db.channel.update_many({"country": old_name}, {"$set": {"country": new_name}})
+            return result.matched_count > 0
+        except Exception as e:
+            logger.error(f"Error updating country: {e}")
+            return False
+
+    def delete_country(self, name: str) -> bool:
+        try:
+            result = self.db.countries.delete_one({"name": name})
+            self.db.channel.update_many({"country": name}, {"$set": {"country": ""}})
+            return result.deleted_count > 0
+        except Exception as e:
+            logger.error(f"Error deleting country: {e}")
+            return False
+
+    def get_country_vtubers(self, country_name: str):
+        """Get all vtubers belonging to a country."""
+        channels = list(self.db.channel.find({"country": country_name}))
+        result = []
+        for i in channels:
+            raw_channel_id = i.get("channel_id", "")
+            clean_channel_id = extract_channel_id_from_url(raw_channel_id)
+            if not clean_channel_id:
+                clean_channel_id = extract_channel_id_from_url(i.get("channel_url", ""))
+            result.append(
+                {
+                    "name": i.get("name", ""),
+                    "company": i.get("company", ""),
+                    "country": i.get("country", ""),
+                    "channel_url": i.get("channel_url", ""),
+                    "platform": i.get("platform", ""),
+                    "subscriber_count": i.get("subscriber_count", 0),
+                    "view_count": i.get("view_count", 0),
+                    "video_count": i.get("video_count", 0),
+                    "activity_status": i.get("activity_status", ""),
+                    "debut_date": i.get("debut_date", ""),
+                    "thumbnail": i.get("thumbnail", ""),
+                    "channel_id": clean_channel_id,
+                }
+            )
+        return result
+
+    def batch_assign_country(self, country_name: str, channel_ids: list) -> dict:
+        """Set exactly `channel_ids` as members of `country_name`; clear others."""
+        clean_ids_set = set(channel_ids)
+        all_channels = list(self.db.channel.find({}, {"_id": 1, "channel_id": 1, "channel_url": 1, "country": 1}))
+
+        to_assign = []
+        to_clear = []
+        for ch in all_channels:
+            raw_id = ch.get("channel_id", "")
+            clean_id = extract_channel_id_from_url(raw_id)
+            if not clean_id:
+                clean_id = extract_channel_id_from_url(ch.get("channel_url", ""))
+            if clean_id in clean_ids_set:
+                to_assign.append(ch["_id"])
+            elif ch.get("country") == country_name:
+                to_clear.append(ch["_id"])
+
+        assigned = 0
+        unassigned = 0
+        if to_assign:
+            res = self.db.channel.update_many({"_id": {"$in": to_assign}}, {"$set": {"country": country_name}})
+            assigned = res.modified_count
+        if to_clear:
+            res2 = self.db.channel.update_many({"_id": {"$in": to_clear}}, {"$set": {"country": ""}})
+            unassigned = res2.modified_count
+        return {"assigned": assigned, "unassigned": unassigned}
+
+    # ─────────────────────────────────────────────────────────────────────────
 
     def upgrade_channel_data_format(self):
         """

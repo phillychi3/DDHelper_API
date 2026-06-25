@@ -18,6 +18,28 @@
 				</div>
 			</a>
 
+			<a
+				href="/company"
+				class="block bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition transform hover:-translate-y-1"
+			>
+				<div class="text-center">
+					<div class="text-5xl mb-4">🏢</div>
+					<h2 class="text-2xl font-bold text-gray-900 mb-2">公司管理</h2>
+					<p class="text-gray-600">管理公司列表並批量指派 VTuber 所屬公司</p>
+				</div>
+			</a>
+
+			<a
+				href="/country"
+				class="block bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition transform hover:-translate-y-1"
+			>
+				<div class="text-center">
+					<div class="text-5xl mb-4">🌏</div>
+					<h2 class="text-2xl font-bold text-gray-900 mb-2">國家管理</h2>
+					<p class="text-gray-600">管理國家列表並批量指派 VTuber 所屬國家</p>
+				</div>
+			</a>
+
 		</div>
 
 		<div class="mt-12 text-center text-gray-500 text-sm">

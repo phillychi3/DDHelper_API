@@ -19,7 +19,7 @@ from controller import VtuberTrackerControl
 from database_schema import VtuberDatabase
 
 DEBUG = False
-API_ONLY_MODE = False
+API_ONLY_MODE = True
 
 
 nowpath = os.path.dirname(os.path.abspath(__file__))

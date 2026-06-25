@@ -115,6 +115,42 @@ class LiveInfo(BaseModel):
     vtuber: VTuber | None = None
 
 
+class Company(BaseModel):
+    name: str
+    youtube: str = ""
+    twitter: str = ""
+    vtuber_count: int = 0
+
+
+class CompanyCreate(BaseModel):
+    name: str
+    youtube: str = ""
+    twitter: str = ""
+
+
+class CompanyUpdate(BaseModel):
+    name: str | None = None
+    youtube: str | None = None
+    twitter: str | None = None
+
+
+class BatchAssignRequest(BaseModel):
+    channel_ids: list[str]
+
+
+class Country(BaseModel):
+    name: str
+    vtuber_count: int = 0
+
+
+class CountryCreate(BaseModel):
+    name: str
+
+
+class CountryUpdate(BaseModel):
+    name: str | None = None
+
+
 class ControllerStatus(BaseModel):
     current_task: str
     current_channel: str | None = None
@@ -421,6 +457,170 @@ async def filter_vtubers(
             del result["_id"]
 
     return results
+
+
+@app.get("/companies", response_model=list[Company], tags=["Companies"])
+async def get_companies(db: VtuberDatabase = Depends(get_db)):
+    """Get all companies with vtuber counts."""
+    return db.get_all_companies()
+
+
+@app.post("/company", response_model=dict[str, str], tags=["Companies"])
+async def create_company(company: CompanyCreate, db: VtuberDatabase = Depends(get_db)):
+    """Create a new company."""
+    existing = db.db.companies.find_one({"name": company.name})
+    if existing:
+        raise HTTPException(status_code=400, detail=f"Company '{company.name}' already exists")
+    success = db.create_company(company.name, company.youtube, company.twitter)
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to create company")
+    logger.info(f"Created company: {company.name}")
+    return {"message": "Company created successfully", "name": company.name}
+
+
+@app.put("/company/{company_name}", response_model=dict[str, str], tags=["Companies"])
+async def update_company(
+    company_name: str, company_update: CompanyUpdate, db: VtuberDatabase = Depends(get_db)
+):
+    """Update a company (rename and/or change description). Renaming also updates all vtubers."""
+    existing = db.db.companies.find_one({"name": company_name})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Company not found")
+    if company_update.name and company_update.name != company_name:
+        conflict = db.db.companies.find_one({"name": company_update.name})
+        if conflict:
+            raise HTTPException(
+                status_code=400, detail=f"Company '{company_update.name}' already exists"
+            )
+    success = db.update_company(company_name, company_update.name, company_update.youtube, company_update.twitter)
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to update company")
+    final_name = company_update.name or company_name
+    logger.info(f"Updated company: {company_name} -> {final_name}")
+    return {"message": "Company updated successfully", "name": final_name}
+
+
+@app.delete("/company/{company_name}", response_model=dict[str, str], tags=["Companies"])
+async def delete_company(company_name: str, db: VtuberDatabase = Depends(get_db)):
+    """Delete a company and clear its vtubers' company field."""
+    existing = db.db.companies.find_one({"name": company_name})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Company not found")
+    success = db.delete_company(company_name)
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to delete company")
+    logger.info(f"Deleted company: {company_name}")
+    return {"message": "Company deleted successfully", "name": company_name}
+
+
+@app.get("/company/{company_name}/vtubers", response_model=list[VTuber], tags=["Companies"])
+async def get_company_vtubers(company_name: str, db: VtuberDatabase = Depends(get_db)):
+    """Get all vtubers belonging to a company."""
+    existing = db.db.companies.find_one({"name": company_name})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Company not found")
+    return db.get_company_vtubers(company_name)
+
+
+@app.put(
+    "/company/{company_name}/vtubers/batch",
+    response_model=dict[str, Any],
+    tags=["Companies"],
+)
+async def batch_assign_company(
+    company_name: str,
+    body: BatchAssignRequest,
+    db: VtuberDatabase = Depends(get_db),
+):
+    """Batch-set the exact vtuber members of a company. Vtubers not in the list are unassigned."""
+    existing = db.db.companies.find_one({"name": company_name})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Company not found")
+    result = db.batch_assign_company(company_name, body.channel_ids)
+    logger.info(f"Batch assign company '{company_name}': {result}")
+    return {"message": "Batch assignment complete", **result}
+
+
+@app.get("/countries", response_model=list[Country], tags=["Countries"])
+async def get_countries(db: VtuberDatabase = Depends(get_db)):
+    """Get all countries with vtuber counts."""
+    return db.get_all_countries()
+
+
+@app.post("/country", response_model=dict[str, str], tags=["Countries"])
+async def create_country(country: CountryCreate, db: VtuberDatabase = Depends(get_db)):
+    """Create a new country."""
+    existing = db.db.countries.find_one({"name": country.name})
+    if existing:
+        raise HTTPException(status_code=400, detail=f"Country '{country.name}' already exists")
+    success = db.create_country(country.name)
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to create country")
+    logger.info(f"Created country: {country.name}")
+    return {"message": "Country created successfully", "name": country.name}
+
+
+@app.put("/country/{country_name}", response_model=dict[str, str], tags=["Countries"])
+async def update_country(
+    country_name: str, country_update: CountryUpdate, db: VtuberDatabase = Depends(get_db)
+):
+    """Update a country. Renaming also updates all vtubers."""
+    existing = db.db.countries.find_one({"name": country_name})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Country not found")
+    if country_update.name and country_update.name != country_name:
+        conflict = db.db.countries.find_one({"name": country_update.name})
+        if conflict:
+            raise HTTPException(
+                status_code=400, detail=f"Country '{country_update.name}' already exists"
+            )
+    success = db.update_country(country_name, country_update.name)
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to update country")
+    final_name = country_update.name or country_name
+    logger.info(f"Updated country: {country_name} -> {final_name}")
+    return {"message": "Country updated successfully", "name": final_name}
+
+
+@app.delete("/country/{country_name}", response_model=dict[str, str], tags=["Countries"])
+async def delete_country(country_name: str, db: VtuberDatabase = Depends(get_db)):
+    """Delete a country and clear its vtubers' country field."""
+    existing = db.db.countries.find_one({"name": country_name})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Country not found")
+    success = db.delete_country(country_name)
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to delete country")
+    logger.info(f"Deleted country: {country_name}")
+    return {"message": "Country deleted successfully", "name": country_name}
+
+
+@app.get("/country/{country_name}/vtubers", response_model=list[VTuber], tags=["Countries"])
+async def get_country_vtubers(country_name: str, db: VtuberDatabase = Depends(get_db)):
+    """Get all vtubers belonging to a country."""
+    existing = db.db.countries.find_one({"name": country_name})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Country not found")
+    return db.get_country_vtubers(country_name)
+
+
+@app.put(
+    "/country/{country_name}/vtubers/batch",
+    response_model=dict[str, Any],
+    tags=["Countries"],
+)
+async def batch_assign_country(
+    country_name: str,
+    body: BatchAssignRequest,
+    db: VtuberDatabase = Depends(get_db),
+):
+    """Batch-set the exact vtuber members of a country."""
+    existing = db.db.countries.find_one({"name": country_name})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Country not found")
+    result = db.batch_assign_country(country_name, body.channel_ids)
+    logger.info(f"Batch assign country '{country_name}': {result}")
+    return {"message": "Batch assignment complete", **result}
 
 
 @app.get("/ping", tags=["System"])

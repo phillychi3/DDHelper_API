@@ -120,3 +120,175 @@ export async function deleteVTuber(channelId: string): Promise<{ message: string
 
 	return response.json();
 }
+
+// Company types
+export interface Company {
+	name: string;
+	youtube: string;
+	twitter: string;
+	vtuber_count: number;
+}
+
+export interface CompanyCreate {
+	name: string;
+	youtube?: string;
+	twitter?: string;
+}
+
+export interface CompanyUpdate {
+	name?: string;
+	youtube?: string;
+	twitter?: string;
+}
+
+// Company API functions
+export async function getAllCompanies(): Promise<Company[]> {
+	const response = await fetch(`${API_BASE_URL}/companies`);
+	if (!response.ok) throw new Error('Failed to fetch companies');
+	return response.json();
+}
+
+export async function createCompany(company: CompanyCreate): Promise<{ message: string; name: string }> {
+	const response = await fetch(`${API_BASE_URL}/company`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(company)
+	});
+	if (!response.ok) {
+		const error = await response.json();
+		throw new Error(error.detail || 'Failed to create company');
+	}
+	return response.json();
+}
+
+export async function updateCompany(
+	name: string,
+	data: CompanyUpdate
+): Promise<{ message: string; name: string }> {
+	const response = await fetch(`${API_BASE_URL}/company/${encodeURIComponent(name)}`, {
+		method: 'PUT',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(data)
+	});
+	if (!response.ok) {
+		const error = await response.json();
+		throw new Error(error.detail || 'Failed to update company');
+	}
+	return response.json();
+}
+
+export async function deleteCompany(name: string): Promise<{ message: string; name: string }> {
+	const response = await fetch(`${API_BASE_URL}/company/${encodeURIComponent(name)}`, {
+		method: 'DELETE'
+	});
+	if (!response.ok) {
+		const error = await response.json();
+		throw new Error(error.detail || 'Failed to delete company');
+	}
+	return response.json();
+}
+
+export async function getCompanyVtubers(name: string): Promise<VTuber[]> {
+	const response = await fetch(`${API_BASE_URL}/company/${encodeURIComponent(name)}/vtubers`);
+	if (!response.ok) throw new Error('Failed to fetch company vtubers');
+	return response.json();
+}
+
+// Country types
+export interface Country {
+	name: string;
+	vtuber_count: number;
+}
+
+export interface CountryCreate {
+	name: string;
+}
+
+export interface CountryUpdate {
+	name?: string;
+}
+
+// Country API functions
+export async function getAllCountries(): Promise<Country[]> {
+	const response = await fetch(`${API_BASE_URL}/countries`);
+	if (!response.ok) throw new Error('Failed to fetch countries');
+	return response.json();
+}
+
+export async function createCountry(name: string): Promise<{ message: string; name: string }> {
+	const response = await fetch(`${API_BASE_URL}/country`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ name })
+	});
+	if (!response.ok) {
+		const error = await response.json();
+		throw new Error(error.detail || 'Failed to create country');
+	}
+	return response.json();
+}
+
+export async function updateCountry(
+	name: string,
+	newName: string
+): Promise<{ message: string; name: string }> {
+	const response = await fetch(`${API_BASE_URL}/country/${encodeURIComponent(name)}`, {
+		method: 'PUT',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ name: newName })
+	});
+	if (!response.ok) {
+		const error = await response.json();
+		throw new Error(error.detail || 'Failed to update country');
+	}
+	return response.json();
+}
+
+export async function deleteCountry(name: string): Promise<{ message: string; name: string }> {
+	const response = await fetch(`${API_BASE_URL}/country/${encodeURIComponent(name)}`, {
+		method: 'DELETE'
+	});
+	if (!response.ok) {
+		const error = await response.json();
+		throw new Error(error.detail || 'Failed to delete country');
+	}
+	return response.json();
+}
+
+export async function batchAssignCountry(
+	countryName: string,
+	channelIds: string[]
+): Promise<{ message: string; assigned: number; unassigned: number }> {
+	const response = await fetch(
+		`${API_BASE_URL}/country/${encodeURIComponent(countryName)}/vtubers/batch`,
+		{
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ channel_ids: channelIds })
+		}
+	);
+	if (!response.ok) {
+		const error = await response.json();
+		throw new Error(error.detail || 'Failed to batch assign country');
+	}
+	return response.json();
+}
+
+export async function batchAssignCompany(
+	companyName: string,
+	channelIds: string[]
+): Promise<{ message: string; assigned: number; unassigned: number }> {
+	const response = await fetch(
+		`${API_BASE_URL}/company/${encodeURIComponent(companyName)}/vtubers/batch`,
+		{
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ channel_ids: channelIds })
+		}
+	);
+	if (!response.ok) {
+		const error = await response.json();
+		throw new Error(error.detail || 'Failed to batch assign company');
+	}
+	return response.json();
+}
