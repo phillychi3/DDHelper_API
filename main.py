@@ -18,7 +18,7 @@ import api
 from controller import VtuberTrackerControl
 from database_schema import VtuberDatabase
 
-DEBUG = False
+
 API_ONLY_MODE = True
 
 
@@ -27,15 +27,17 @@ with open(os.path.join(nowpath, "config.yaml"), encoding="utf-8") as f:
     setting = yaml.load(f, Loader=yaml.FullLoader)
 
 
+DEV_MODE = setting.get("dev_mode", False)
+
 db = VtuberDatabase(setting["database"])
 db.reset_live()
 
-api.init_api(db)
+api.init_api(db, dev_mode=DEV_MODE)
 
 
 FORMAT = "[VtuberTracker] %(asctime)s %(levelname)s: %(message)s"
 logger = logging.getLogger("vtuber_tracker")
-if DEBUG:
+if DEV_MODE:
     coloredlogs.install(level="DEBUG")
     logger.setLevel(logging.DEBUG)
 else:
@@ -54,7 +56,7 @@ def init_api_thread(tracker_control=None):
         target=lambda: api.start(
             host=setting.get("api_host", "0.0.0.0"),
             port=setting.get("api_port", 7600),
-            debug=DEBUG,
+            debug=DEV_MODE,
         ),
         name="API_Thread",
     )
@@ -65,14 +67,14 @@ def init_api_thread(tracker_control=None):
 
 
 def init_tracker_thread():
-    tracker_control = VtuberTrackerControl(db, setting["youtube_api_key"], DEBUG)
+    tracker_control = VtuberTrackerControl(db, setting["youtube_api_key"], DEV_MODE)
     tracker_control.max_api_units_per_day = setting.get("max_api_units_per_day", 10000)
 
     if not setting.get("youtube_api_key") or setting.get("disable_api", False):
         tracker_control.api_quota_exceeded = True
         logger.info("API usage disabled by configuration")
 
-    api.init_api(db, tracker_control)
+    api.init_api(db, tracker_control, dev_mode=DEV_MODE)
 
     tracker_thread = threading.Thread(target=tracker_control.start, name="Tracker_Thread")
     tracker_thread.daemon = True
@@ -134,7 +136,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.debug:
-        DEBUG = True
+        DEV_MODE = True
         coloredlogs.install(level="DEBUG")
         logger.setLevel(logging.DEBUG)
         logger.info("Debug mode enabled")

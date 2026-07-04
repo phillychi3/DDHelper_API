@@ -174,8 +174,8 @@ class VtuberDatabase:
         return result
 
     def get_channelurl_list(self):
-        """Get a list of all channel URLs."""
-        return [i["channel_url"] for i in self.db.channel.find()]
+        """Get a list of all channel URLs, excluding graduated VTubers."""
+        return [i["channel_url"] for i in self.db.channel.find({"activity_status": {"$ne": "graduated"}})]
 
     def get_channels(self):
         """Get all channels with basic info."""

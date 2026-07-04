@@ -2,7 +2,7 @@ import logging
 from enum import Enum
 from typing import Any
 
-from fastapi import Depends, FastAPI, HTTPException, Query
+from fastapi import APIRouter, Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -170,12 +170,19 @@ class ControllerStatus(BaseModel):
 
 controller = None
 
+management_router = APIRouter()
+debug_router = APIRouter()
 
-def init_api(database, tracker_controller=None):
+
+def init_api(database, tracker_controller=None, dev_mode=False):
     """Initialize the API with database and controller instances."""
     global db, controller
     db = database
     controller = tracker_controller
+    if dev_mode:
+        app.include_router(management_router)
+        app.include_router(debug_router)
+        logger.info("Dev mode: management and debug routes are enabled")
 
 
 def get_controller():
@@ -258,7 +265,7 @@ async def get_vtuber(channel_id: str, db: VtuberDatabase = Depends(get_db)):
     return vtuber
 
 
-@app.post("/vtuber", response_model=dict[str, str], tags=["VTubers Management"])
+@management_router.post("/vtuber", response_model=dict[str, str], tags=["VTubers Management"])
 async def create_vtuber(vtuber: VTuberCreate, db: VtuberDatabase = Depends(get_db)):
     """Create a new VTuber entry."""
     # Resolve the real UC channel ID (handles @handle -> UCxxxx conversion)
@@ -293,7 +300,7 @@ async def create_vtuber(vtuber: VTuberCreate, db: VtuberDatabase = Depends(get_d
     return {"message": "VTuber created successfully", "channel_id": real_channel_id}
 
 
-@app.put("/vtuber/{channel_id}", response_model=dict[str, str], tags=["VTubers Management"])
+@management_router.put("/vtuber/{channel_id}", response_model=dict[str, str], tags=["VTubers Management"])
 async def update_vtuber(
     channel_id: str, vtuber_update: VTuberUpdate, db: VtuberDatabase = Depends(get_db)
 ):
@@ -319,7 +326,7 @@ async def update_vtuber(
     return {"message": "VTuber updated successfully", "channel_id": channel_id}
 
 
-@app.delete("/vtuber/{channel_id}", response_model=dict[str, str], tags=["VTubers Management"])
+@management_router.delete("/vtuber/{channel_id}", response_model=dict[str, str], tags=["VTubers Management"])
 async def delete_vtuber(channel_id: str, db: VtuberDatabase = Depends(get_db)):
     """Delete a VTuber entry."""
     # Check if channel exists
@@ -465,7 +472,7 @@ async def get_companies(db: VtuberDatabase = Depends(get_db)):
     return db.get_all_companies()
 
 
-@app.post("/company", response_model=dict[str, str], tags=["Companies"])
+@management_router.post("/company", response_model=dict[str, str], tags=["Companies"])
 async def create_company(company: CompanyCreate, db: VtuberDatabase = Depends(get_db)):
     """Create a new company."""
     existing = db.db.companies.find_one({"name": company.name})
@@ -478,7 +485,7 @@ async def create_company(company: CompanyCreate, db: VtuberDatabase = Depends(ge
     return {"message": "Company created successfully", "name": company.name}
 
 
-@app.put("/company/{company_name}", response_model=dict[str, str], tags=["Companies"])
+@management_router.put("/company/{company_name}", response_model=dict[str, str], tags=["Companies"])
 async def update_company(
     company_name: str, company_update: CompanyUpdate, db: VtuberDatabase = Depends(get_db)
 ):
@@ -500,7 +507,7 @@ async def update_company(
     return {"message": "Company updated successfully", "name": final_name}
 
 
-@app.delete("/company/{company_name}", response_model=dict[str, str], tags=["Companies"])
+@management_router.delete("/company/{company_name}", response_model=dict[str, str], tags=["Companies"])
 async def delete_company(company_name: str, db: VtuberDatabase = Depends(get_db)):
     """Delete a company and clear its vtubers' company field."""
     existing = db.db.companies.find_one({"name": company_name})
@@ -522,7 +529,7 @@ async def get_company_vtubers(company_name: str, db: VtuberDatabase = Depends(ge
     return db.get_company_vtubers(company_name)
 
 
-@app.put(
+@management_router.put(
     "/company/{company_name}/vtubers/batch",
     response_model=dict[str, Any],
     tags=["Companies"],
@@ -547,7 +554,7 @@ async def get_countries(db: VtuberDatabase = Depends(get_db)):
     return db.get_all_countries()
 
 
-@app.post("/country", response_model=dict[str, str], tags=["Countries"])
+@management_router.post("/country", response_model=dict[str, str], tags=["Countries"])
 async def create_country(country: CountryCreate, db: VtuberDatabase = Depends(get_db)):
     """Create a new country."""
     existing = db.db.countries.find_one({"name": country.name})
@@ -560,7 +567,7 @@ async def create_country(country: CountryCreate, db: VtuberDatabase = Depends(ge
     return {"message": "Country created successfully", "name": country.name}
 
 
-@app.put("/country/{country_name}", response_model=dict[str, str], tags=["Countries"])
+@management_router.put("/country/{country_name}", response_model=dict[str, str], tags=["Countries"])
 async def update_country(
     country_name: str, country_update: CountryUpdate, db: VtuberDatabase = Depends(get_db)
 ):
@@ -582,7 +589,7 @@ async def update_country(
     return {"message": "Country updated successfully", "name": final_name}
 
 
-@app.delete("/country/{country_name}", response_model=dict[str, str], tags=["Countries"])
+@management_router.delete("/country/{country_name}", response_model=dict[str, str], tags=["Countries"])
 async def delete_country(country_name: str, db: VtuberDatabase = Depends(get_db)):
     """Delete a country and clear its vtubers' country field."""
     existing = db.db.countries.find_one({"name": country_name})
@@ -604,7 +611,7 @@ async def get_country_vtubers(country_name: str, db: VtuberDatabase = Depends(ge
     return db.get_country_vtubers(country_name)
 
 
-@app.put(
+@management_router.put(
     "/country/{country_name}/vtubers/batch",
     response_model=dict[str, Any],
     tags=["Countries"],
@@ -629,7 +636,7 @@ async def ping():
     return {"status": "ok", "message": "pong"}
 
 
-@app.get("/debug/channel/{channel_id}", tags=["Debug"])
+@debug_router.get("/debug/channel/{channel_id}", tags=["Debug"])
 async def debug_channel(channel_id: str, db: VtuberDatabase = Depends(get_db)):
     """Debug endpoint to see raw channel data from database."""
     # Try to find by channel_id
@@ -649,7 +656,7 @@ async def debug_channel(channel_id: str, db: VtuberDatabase = Depends(get_db)):
     return {"raw_data": raw_data, "message": "This is the raw data from MongoDB"}
 
 
-@app.get("/debug/find-by-url", tags=["Debug"])
+@debug_router.get("/debug/find-by-url", tags=["Debug"])
 async def debug_find_by_url(url: str, db: VtuberDatabase = Depends(get_db)):
     """Debug endpoint to find channel by exact channel_url match."""
     raw_data = db.db.channel.find_one({"channel_url": url})

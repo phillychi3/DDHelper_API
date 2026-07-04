@@ -22,6 +22,7 @@ max_api_units_per_day: 10000 # Daily API quota units
 api_host: "0.0.0.0"
 api_port: 7600
 api_only_mode: false # Set to true to run only API server without tracker controller
+dev_mode: false # Set to true to enable management and debug routes (local development only)
 
 # Logging settings
 log_level: "INFO" # DEBUG, INFO, WARNING, ERROR, CRITICAL
